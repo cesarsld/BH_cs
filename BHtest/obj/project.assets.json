@@ -7042,10 +7042,10 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Cesar Jaimes\\Documents\\GitHub\\BHtest\\BHtest\\BHtest.csproj",
+      "projectUniqueName": "C:\\Users\\Cesar Jaimes\\Documents\\GitHub\\BHtest\\BH_cs\\BHtest\\BHtest.csproj",
       "projectName": "BHtest",
-      "projectPath": "C:\\Users\\Cesar Jaimes\\Documents\\GitHub\\BHtest\\BHtest\\BHtest.csproj",
-      "outputPath": "C:\\Users\\Cesar Jaimes\\Documents\\GitHub\\BHtest\\BHtest\\obj\\",
+      "projectPath": "C:\\Users\\Cesar Jaimes\\Documents\\GitHub\\BHtest\\BH_cs\\BHtest\\BHtest.csproj",
+      "outputPath": "C:\\Users\\Cesar Jaimes\\Documents\\GitHub\\BHtest\\BH_cs\\BHtest\\obj\\",
       "projectStyle": "PackageReference",
       "originalTargetFrameworks": [
         "netcoreapp1.1"

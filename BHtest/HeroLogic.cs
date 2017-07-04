@@ -9,7 +9,7 @@ namespace BHtest
 
         public static void spreadHealingSkill(int k)
         {
-            Random rnd = new Random();
+            Random rnd = new Random(Guid.NewGuid().GetHashCode());
             int i;
             int target = 0;
             int healingValue = 0;
@@ -36,12 +36,12 @@ namespace BHtest
 
         public static void heroAttack(int k, bool dual)
         {
-            Random rnd = new Random();
+            Random rnd = new Random(Guid.NewGuid().GetHashCode());
             int skillSelection;
-            float attackValue = 0;
+            int attackValue = 0;
             bool hasHealed = false;
             int attackModifier = Convert.ToInt32(0.2 * Simulation.hero[k].power);
-            attackValue = rnd.Next(0, attackModifier) + 0.9f * Simulation.hero[k].power;
+            attackValue = Convert.ToInt32(rnd.Next(0, attackModifier) + 0.9f * Simulation.hero[k].power);
             if (Simulation.hero[k].sp >= 2)
             {
                 skillSelection = rnd.Next(0, 100);
@@ -58,7 +58,7 @@ namespace BHtest
                 {
                     float skillModifier = rnd.Next(0, 50) + 110;
                     skillModifier /= 100;
-                    attackValue = Simulation.hero[k].power * skillModifier;
+                    attackValue = Convert.ToInt32(Simulation.hero[k].power * skillModifier);
                     if (!dual)
                     {
                         Simulation.hero[k].sp -= 2;
@@ -68,12 +68,12 @@ namespace BHtest
             bool critRoll = Logic.RNGroll(Simulation.hero[k].critChance);
             if (critRoll)
             {
-                attackValue *= Simulation.hero[k].critDamage;
+                attackValue = Convert.ToInt32(attackValue * Simulation.hero[k].critDamage);
             }
             bool evadeRoll = Logic.RNGroll(2.5f);
             if (!evadeRoll && hasHealed == false)
             {
-                Simulation.hpDummy = Convert.ToInt32(Simulation.hpDummy - attackValue);
+                Simulation.hpDummy -= attackValue;
                 PetLogic.petSelection(k);
             }
         }

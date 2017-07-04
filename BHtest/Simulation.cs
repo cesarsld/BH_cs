@@ -7,7 +7,7 @@ namespace BHtest
     public class Simulation
     {
         public static Hero[] hero = new Hero[5];
-        public static int dummyPower = 1700, dummyStamina = 3060, dummyAgility = 680, hpDummy, spDummy = 0;
+        public static int dummyPower = 1600, dummyStamina = 2880, dummyAgility = 640, hpDummy, spDummy = 0;
 
 
         public static void hellosim()
@@ -38,19 +38,19 @@ namespace BHtest
                 teamAlive = true;
                 playerNo = 5;
 
-                hero[0].power = 440;
-                hero[1].power = 580;
-                hero[2].power = 930;
-                hero[3].power = 568;
+                hero[0].power = 452;
+                hero[1].power = 600;
+                hero[2].power = 1020;
+                hero[3].power = 600;
                 hero[4].power = 100;
-                hero[0].stamina = 692;
-                hero[1].stamina = 185;
-                hero[2].stamina = 186;
-                hero[3].stamina = 205;
+                hero[0].stamina = 704;
+                hero[1].stamina = 200;
+                hero[2].stamina = 138;
+                hero[3].stamina = 200;
                 hero[4].stamina = 1010;
                 hero[0].agility = 101;
-                hero[1].agility = 450;
-                hero[2].agility = 240;
+                hero[1].agility = 600;
+                hero[2].agility = 77;
                 hero[3].agility = 555;
                 hero[4].agility = 100;
                 hero[0].sp = 4;
@@ -59,21 +59,21 @@ namespace BHtest
                 hero[3].sp = 4;
                 hero[4].sp = 4;
                 hero[0].critChance = 10f;
-                hero[1].critChance = 15f;
+                hero[1].critChance = 29f;
                 hero[2].critChance = 25f;
-                hero[3].critChance = 25f;
+                hero[3].critChance = 10f;
                 hero[4].critChance = 10f;
                 hero[0].critDamage = 1.5f;
                 hero[1].critDamage = 1.5f;
                 hero[2].critDamage = 1.5f;
-                hero[3].critDamage = 2f;
+                hero[3].critDamage = 1.5f;
                 hero[4].critDamage = 1.5f;
                 hero[0].dsChance = 0f;
-                hero[1].dsChance = 15f;
-                hero[2].dsChance = 7.5f;
-                hero[3].dsChance = 5f;
+                hero[1].dsChance = 7.5f;
+                hero[2].dsChance = 18f;
+                hero[3].dsChance = 10f;
                 hero[4].dsChance = 0f;
-                hero[0].blockChance = 30f;
+                hero[0].blockChance = 31f;
                 hero[1].blockChance = 0f;
                 hero[2].blockChance = 0f;
                 hero[3].blockChance = 0f;
@@ -89,20 +89,20 @@ namespace BHtest
                 hero[3].deflectChance = 0f;
                 hero[4].deflectChance = 5f;
                 hero[0].powerRunes = 1f;
-                hero[1].powerRunes = 1.175f;
-                hero[2].powerRunes = 1.2f;
-                hero[3].powerRunes = 1.05f;
+                hero[1].powerRunes = 1.22f;
+                hero[2].powerRunes = 1.155f;
+                hero[3].powerRunes = 1.16f;
                 hero[4].powerRunes = 1f;
                 hero[0].agilityRunes = 1f;
-                hero[1].agilityRunes = 1.1f;
+                hero[1].agilityRunes = 1f;
                 hero[2].agilityRunes = 1f;
                 hero[3].agilityRunes = 1.025f;
                 hero[4].agilityRunes = 1f;
-                hero[0].pet = "gemmi";
+                hero[0].pet = "boogie";
                 hero[1].pet = "nelson";
-                hero[2].pet = "nelson";
+                hero[2].pet = "gemmi";
                 hero[3].pet = "nelson";
-                hero[4].pet = "nelson";
+                hero[4].pet = "gemmi";
                 hero[0].alive = true;
                 hero[1].alive = true;
                 hero[2].alive = true;

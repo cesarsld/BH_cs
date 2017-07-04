@@ -16,3 +16,12 @@ C:\Users\Cesar Jaimes\Documents\GitHub\BHtest\BHtest\obj\Debug\netcoreapp1.1\BHt
 C:\Users\Cesar Jaimes\Documents\GitHub\BHtest\BHtest\obj\Debug\netcoreapp1.1\BHtest.AssemblyInfo.cs
 C:\Users\Cesar Jaimes\Documents\GitHub\BHtest\BHtest\obj\Debug\netcoreapp1.1\BHtest.dll
 C:\Users\Cesar Jaimes\Documents\GitHub\BHtest\BHtest\obj\Debug\netcoreapp1.1\BHtest.pdb
+C:\Users\Cesar Jaimes\Documents\GitHub\BHtest\BH_cs\BHtest\bin\Debug\netcoreapp1.1\BHtest.deps.json
+C:\Users\Cesar Jaimes\Documents\GitHub\BHtest\BH_cs\BHtest\bin\Debug\netcoreapp1.1\BHtest.runtimeconfig.json
+C:\Users\Cesar Jaimes\Documents\GitHub\BHtest\BH_cs\BHtest\bin\Debug\netcoreapp1.1\BHtest.runtimeconfig.dev.json
+C:\Users\Cesar Jaimes\Documents\GitHub\BHtest\BH_cs\BHtest\bin\Debug\netcoreapp1.1\BHtest.dll
+C:\Users\Cesar Jaimes\Documents\GitHub\BHtest\BH_cs\BHtest\bin\Debug\netcoreapp1.1\BHtest.pdb
+C:\Users\Cesar Jaimes\Documents\GitHub\BHtest\BH_cs\BHtest\obj\Debug\netcoreapp1.1\BHtest.csprojResolveAssemblyReference.cache
+C:\Users\Cesar Jaimes\Documents\GitHub\BHtest\BH_cs\BHtest\obj\Debug\netcoreapp1.1\BHtest.AssemblyInfo.cs
+C:\Users\Cesar Jaimes\Documents\GitHub\BHtest\BH_cs\BHtest\obj\Debug\netcoreapp1.1\BHtest.dll
+C:\Users\Cesar Jaimes\Documents\GitHub\BHtest\BH_cs\BHtest\obj\Debug\netcoreapp1.1\BHtest.pdb

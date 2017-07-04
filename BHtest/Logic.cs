@@ -9,7 +9,7 @@ namespace BHtest
 
         public static bool RNGroll(float a)
         {
-            Random rnd = new Random();
+            Random rnd = new Random(Guid.NewGuid().GetHashCode());
             bool outcome;
             float chance = a * 10f;
             float roll = rnd.Next(0, 1000);
@@ -35,7 +35,7 @@ namespace BHtest
 
         public static void teamHeal(int l)
         {
-            Random rnd = new Random();
+            Random rnd = new Random(Guid.NewGuid().GetHashCode());
             int i;
             int healModifier = Convert.ToInt32(Simulation.hero[l].power * 0.072);
             float healValue = Convert.ToInt32(rnd.Next(0, healModifier) + 0.324 * Simulation.hero[l].power);
@@ -81,18 +81,16 @@ namespace BHtest
             hpPerc();
             for (i = 0; i < 4; i++)
             {
-                if (Simulation.hero[lowest].hpPerc <= Simulation.hero[i + 1].hpPerc)
-                {
-                    if (!Simulation.hero[i].alive)
-                    {
-                        lowest = i + 1;
-                    }
-                }
-                else
+                if (Simulation.hero[lowest].hpPerc >= Simulation.hero[i + 1].hpPerc)
                 {
                     if (Simulation.hero[i + 1].alive)
                     {
                         lowest = i + 1;
+                    }
+                    else {
+                        if (!Simulation.hero[lowest].alive) {
+                            lowest = i + 1;
+                        }
                     }
                 }
             }
@@ -101,7 +99,7 @@ namespace BHtest
 
         public static int targetSelection(int method)
         {
-            Random rnd = new Random();
+            Random rnd = new Random(Guid.NewGuid().GetHashCode());
             int target = 0;
             int i = 0;
             bool targetLocked = false;
@@ -148,7 +146,7 @@ namespace BHtest
 
         unsafe public static int bossSkillSelection(int sp, int* finalAttack)
         {
-            Random rnd = new Random();
+            Random rnd = new Random(Guid.NewGuid().GetHashCode());
             int attackValue = 0;
             int skillRoll = 0;
             int attackModifier = 0;

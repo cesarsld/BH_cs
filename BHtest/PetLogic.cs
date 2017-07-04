@@ -9,7 +9,7 @@ namespace BHtest
 
         public static void offPetProc(int l)
         {
-            Random rnd = new Random();
+            Random rnd = new Random(Guid.NewGuid().GetHashCode());
             int attackModifier = Convert.ToInt32(0.54 * Simulation.hero[l].power);
             int attackValue = Convert.ToInt32(rnd.Next(0, attackModifier) + Simulation.hero[l].power * 0.63);
 
@@ -31,7 +31,7 @@ namespace BHtest
 
         public static void superOffPetProc(int l)
         {
-            Random rnd = new Random();
+            Random rnd = new Random(Guid.NewGuid().GetHashCode());
             int attackModifier = Convert.ToInt32(Simulation.hero[l].power * 0.37);
             int attackValue = Convert.ToInt32(rnd.Next(0, attackModifier) + Simulation.hero[l].power * 1.668);
 
@@ -52,7 +52,7 @@ namespace BHtest
 
         public static void spreadHealPet(int l)
         {
-            Random rnd = new Random();
+            Random rnd = new Random(Guid.NewGuid().GetHashCode());
             int i;
             int target = 0;
             int healModifier = Convert.ToInt32(Simulation.hero[l].power * 0.14);
