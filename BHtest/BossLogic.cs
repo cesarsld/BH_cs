@@ -6,12 +6,12 @@ namespace BHtest
 {
     class BossLogic
     {
-        unsafe public static void bossAttack()
+        public static void bossAttack()
         {
             int k;
             int attackValue = 0;
             int target;
-            target = Logic.bossSkillSelection(Simulation.spDummy, &attackValue);
+            target = Logic.bossSkillSelection(Simulation.spDummy, out attackValue);
 
             k = Logic.targetSelection(target);
 

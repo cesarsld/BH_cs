@@ -31,10 +31,19 @@ namespace BHtest
 
             bool DS;
             bool teamAlive = true;
+            int progressionBar = 0;
 
 
             for (p = 0; p < games; p++)
             {  // for loop to simulate as many fights as you want.
+
+                
+                if ((float)p % 1000 == 0 && p > 0)
+                {
+                    progressionBar += 10;
+                    Console.WriteLine(progressionBar);
+                }
+
                 teamAlive = true;
                 playerNo = 5;
 
@@ -98,7 +107,7 @@ namespace BHtest
                 hero[2].agilityRunes = 1f;
                 hero[3].agilityRunes = 1.025f;
                 hero[4].agilityRunes = 1f;
-                hero[0].pet = "boogie";
+                hero[0].pet = "gemmi";
                 hero[1].pet = "nelson";
                 hero[2].pet = "gemmi";
                 hero[3].pet = "nelson";
@@ -191,6 +200,7 @@ namespace BHtest
                     lose++;
                     dummyCounter = 0;
                 }
+                
             }
             winRate = (win / games) * 100;
 

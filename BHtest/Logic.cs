@@ -144,7 +144,7 @@ namespace BHtest
         }
 
 
-        unsafe public static int bossSkillSelection(int sp, int* finalAttack)
+        public static int bossSkillSelection(int sp, out int finalAttack)
         {
             Random rnd = new Random(Guid.NewGuid().GetHashCode());
             int attackValue = 0;
@@ -291,7 +291,7 @@ namespace BHtest
                     targetMethod = 3;
                 }
             }
-            *finalAttack = attackValue;
+            finalAttack = attackValue;
             return targetMethod;
         }
 
