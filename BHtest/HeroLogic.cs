@@ -78,5 +78,77 @@ namespace BHtest
             }
         }
 
+        public static void heroAttackTarget(int k, bool dual, int target)
+        {
+            Random rnd = new Random(Guid.NewGuid().GetHashCode());
+            int skillSelection;
+            int attackValue = 0;
+            bool hasHealed = false;
+            int attackModifier = Convert.ToInt32(0.2 * Simulation.hero[k].power);
+            attackValue = Convert.ToInt32(rnd.Next(0, attackModifier) + 0.9f * Simulation.hero[k].power);
+            if (Simulation.hero[k].sp >= 2)
+            {
+                skillSelection = rnd.Next(0, 100);
+                if (skillSelection < 20 && (Simulation.hero[0].hpPerc < 0.85f || Simulation.hero[4].hpPerc < 0.85f))
+                {
+                    spreadHealingSkill(k);
+                    hasHealed = true;
+                    if (!dual)
+                    {
+                        Simulation.hero[k].sp -= 2;
+                    }
+                }
+                else
+                {
+                    float skillModifier = rnd.Next(0, 50) + 110;
+                    skillModifier /= 100;
+                    attackValue = Convert.ToInt32(Simulation.hero[k].power * skillModifier);
+                    if (!dual)
+                    {
+                        Simulation.hero[k].sp -= 2;
+                    }
+                }
+            }
+            bool critRoll = Logic.RNGroll(Simulation.hero[k].critChance);
+            if (critRoll)
+            {
+                attackValue = Convert.ToInt32(attackValue * Simulation.hero[k].critDamage);
+            }
+            bool evadeRoll = Logic.RNGroll(2.5f);
+            if (!evadeRoll && hasHealed == false)
+            {
+                target -= attackValue;
+                PetLogic.petSelection(k);
+            }
+        }
+
+        public static void swordSkillSelection() { }
+
+        public static void spearSkillSelection() { }
+
+        public static void bowSkillSelection() { }
+
+        public static void staffSkillSelection() { }
+
+        public static void petSelection(int k)
+        {
+            if ((int)Simulation.hero[k].weapon == 1)
+            {
+                bowSkillSelection();
+            }
+            if ((int)Simulation.hero[k].weapon == 2)
+            {
+                spearSkillSelection();
+            }
+            if ((int)Simulation.hero[k].weapon == 3)
+            {
+                swordSkillSelection();
+            }
+            if ((int)Simulation.hero[k].weapon == 4)
+            {
+                staffSkillSelection();
+            }
+
+        }
     }
 }

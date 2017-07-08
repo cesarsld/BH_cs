@@ -44,7 +44,14 @@ namespace BHtest
             Nelson,
             Gemmi
         }
-
+        public Weapon weapon;
+        public enum Weapon
+        {
+            bow,
+            spear,
+            sword,
+            staff
+        }
         // Predefined Heroes
         public static readonly Dictionary<string, Hero> predefined = new Dictionary<string, Hero>() {
         {

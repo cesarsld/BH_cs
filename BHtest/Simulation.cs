@@ -21,7 +21,7 @@ namespace BHtest
             float winRate;
 
             int games = 10000; //number of times fight will run.
-            int playerNo;
+            int playerNo = 5;
             int counterMax = 100;
             int cycle;
 
@@ -32,6 +32,90 @@ namespace BHtest
             bool DS;
             bool teamAlive = true;
             int progressionBar = 0;
+
+            hero[0].power = 452;
+            hero[1].power = 600;
+            hero[2].power = 1020;
+            hero[3].power = 600;
+            hero[4].power = 100;
+            hero[0].stamina = 704;
+            hero[1].stamina = 200;
+            hero[2].stamina = 138;
+            hero[3].stamina = 200;
+            hero[4].stamina = 1010;
+            hero[0].agility = 101;
+            hero[1].agility = 600;
+            hero[2].agility = 77;
+            hero[3].agility = 555;
+            hero[4].agility = 100;
+            hero[0].sp = 4;
+            hero[1].sp = 4;
+            hero[2].sp = 4;
+            hero[3].sp = 4;
+            hero[4].sp = 4;
+            hero[0].critChance = 10f;
+            hero[1].critChance = 29f;
+            hero[2].critChance = 25f;
+            hero[3].critChance = 10f;
+            hero[4].critChance = 10f;
+            hero[0].critDamage = 1.5f;
+            hero[1].critDamage = 1.5f;
+            hero[2].critDamage = 1.5f;
+            hero[3].critDamage = 1.5f;
+            hero[4].critDamage = 1.5f;
+            hero[0].dsChance = 0f;
+            hero[1].dsChance = 7.5f;
+            hero[2].dsChance = 18f;
+            hero[3].dsChance = 10f;
+            hero[4].dsChance = 0f;
+            hero[0].blockChance = 31f;
+            hero[1].blockChance = 0f;
+            hero[2].blockChance = 0f;
+            hero[3].blockChance = 0f;
+            hero[4].blockChance = 40f;
+            hero[0].evadeChance = 14f;
+            hero[1].evadeChance = 2.5f;
+            hero[2].evadeChance = 2.5f;
+            hero[3].evadeChance = 2.5f;
+            hero[4].evadeChance = 12.5f;
+            hero[0].deflectChance = 5f;
+            hero[1].deflectChance = 0f;
+            hero[2].deflectChance = 0f;
+            hero[3].deflectChance = 0f;
+            hero[4].deflectChance = 5f;
+            hero[0].powerRunes = 1f;
+            hero[1].powerRunes = 1.22f;
+            hero[2].powerRunes = 1.155f;
+            hero[3].powerRunes = 1.16f;
+            hero[4].powerRunes = 1f;
+            hero[0].agilityRunes = 1f;
+            hero[1].agilityRunes = 1f;
+            hero[2].agilityRunes = 1f;
+            hero[3].agilityRunes = 1.025f;
+            hero[4].agilityRunes = 1f;
+            hero[0].pet = "gemmi";
+            hero[1].pet = "nelson";
+            hero[2].pet = "gemmi";
+            hero[3].pet = "nelson";
+            hero[4].pet = "gemmi";
+            hero[0].alive = true;
+            hero[1].alive = true;
+            hero[2].alive = true;
+            hero[3].alive = true;
+            hero[4].alive = true;
+
+            for (i = 0; i < playerNo; i++)
+            {  //initialisation
+                hero[i].turnRate = Logic.turnRate(hero[i].power, hero[i].agility);
+                hero[i].power = Convert.ToInt32(hero[i].power * hero[i].powerRunes);
+                hero[i].turnRate *= hero[i].agilityRunes;
+                //hero[i].hp = hero[i].stamina * 10;
+                hero[i].maxHp = hero[i].stamina * 10;
+                hero[i].interval = counterMax / hero[i].turnRate;
+                //hero[i].counter = 0;
+                //hero[i].sp = 4;
+                //hero[i].alive = true;
+            }
 
 
             for (p = 0; p < games; p++)
@@ -45,78 +129,9 @@ namespace BHtest
                 }
 
                 teamAlive = true;
-                playerNo = 5;
+                
 
-                hero[0].power = 452;
-                hero[1].power = 600;
-                hero[2].power = 1020;
-                hero[3].power = 600;
-                hero[4].power = 100;
-                hero[0].stamina = 704;
-                hero[1].stamina = 200;
-                hero[2].stamina = 138;
-                hero[3].stamina = 200;
-                hero[4].stamina = 1010;
-                hero[0].agility = 101;
-                hero[1].agility = 600;
-                hero[2].agility = 77;
-                hero[3].agility = 555;
-                hero[4].agility = 100;
-                hero[0].sp = 4;
-                hero[1].sp = 4;
-                hero[2].sp = 4;
-                hero[3].sp = 4;
-                hero[4].sp = 4;
-                hero[0].critChance = 10f;
-                hero[1].critChance = 29f;
-                hero[2].critChance = 25f;
-                hero[3].critChance = 10f;
-                hero[4].critChance = 10f;
-                hero[0].critDamage = 1.5f;
-                hero[1].critDamage = 1.5f;
-                hero[2].critDamage = 1.5f;
-                hero[3].critDamage = 1.5f;
-                hero[4].critDamage = 1.5f;
-                hero[0].dsChance = 0f;
-                hero[1].dsChance = 7.5f;
-                hero[2].dsChance = 18f;
-                hero[3].dsChance = 10f;
-                hero[4].dsChance = 0f;
-                hero[0].blockChance = 31f;
-                hero[1].blockChance = 0f;
-                hero[2].blockChance = 0f;
-                hero[3].blockChance = 0f;
-                hero[4].blockChance = 40f;
-                hero[0].evadeChance = 14f;
-                hero[1].evadeChance = 2.5f;
-                hero[2].evadeChance = 2.5f;
-                hero[3].evadeChance = 2.5f;
-                hero[4].evadeChance = 12.5f;
-                hero[0].deflectChance = 5f;
-                hero[1].deflectChance = 0f;
-                hero[2].deflectChance = 0f;
-                hero[3].deflectChance = 0f;
-                hero[4].deflectChance = 5f;
-                hero[0].powerRunes = 1f;
-                hero[1].powerRunes = 1.22f;
-                hero[2].powerRunes = 1.155f;
-                hero[3].powerRunes = 1.16f;
-                hero[4].powerRunes = 1f;
-                hero[0].agilityRunes = 1f;
-                hero[1].agilityRunes = 1f;
-                hero[2].agilityRunes = 1f;
-                hero[3].agilityRunes = 1.025f;
-                hero[4].agilityRunes = 1f;
-                hero[0].pet = "gemmi";
-                hero[1].pet = "nelson";
-                hero[2].pet = "gemmi";
-                hero[3].pet = "nelson";
-                hero[4].pet = "gemmi";
-                hero[0].alive = true;
-                hero[1].alive = true;
-                hero[2].alive = true;
-                hero[3].alive = true;
-                hero[4].alive = true;
+                
 
 
 
@@ -127,12 +142,7 @@ namespace BHtest
 
                 for (i = 0; i < playerNo; i++)
                 {  //initialisation
-                    hero[i].turnRate = Logic.turnRate(hero[i].power, hero[i].agility);
-                    hero[i].power = Convert.ToInt32(hero[i].power * hero[i].powerRunes);
-                    hero[i].turnRate *= hero[i].agilityRunes;
-                    hero[i].hp = hero[i].stamina * 10;
-                    hero[i].maxHp = hero[i].hp;
-                    hero[i].interval = counterMax / hero[i].turnRate;
+                    hero[i].hp = hero[i].maxHp;
                     hero[i].counter = 0;
                     hero[i].sp = 4;
                     hero[i].alive = true;
