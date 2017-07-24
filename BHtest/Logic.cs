@@ -63,6 +63,33 @@ namespace BHtest
             }
         }
 
+		public static void teamHeal1v1(int l)
+		{
+			Random rnd = new Random(Guid.NewGuid().GetHashCode());
+			int healModifier = Convert.ToInt32(OneVsOne.hero[l].power * 0.072);
+			float healValue = Convert.ToInt32(rnd.Next(0, healModifier) + 0.324 * OneVsOne.hero[l].power);
+
+			bool critroll = RNGroll(OneVsOne.hero[l].critChance);
+			bool petRoll = RNGroll(20f);
+
+			if (critroll)
+			{
+				healValue *= OneVsOne.hero[l].critDamage;
+			}
+			if (petRoll)
+			{
+				Console.WriteLine ("{0}'s pet proced healing for {1} hp!\n", OneVsOne.hero[l].heroName, healValue);
+				if (OneVsOne.hero[l].hp > 0)
+					{
+					OneVsOne.hero[l].hp += Convert.ToInt32(healValue);
+					if (OneVsOne.hero[l].hp >= OneVsOne.hero[l].maxHp)
+					{
+						Simulation.hero[l].hp = Simulation.hero[l].maxHp;
+					}
+				}
+			}
+		}
+
         public static void hpPerc()
         {
             int i;
@@ -73,6 +100,17 @@ namespace BHtest
 
             }
         }
+
+		public static void hpPerc1v1() {
+			int i;
+			for (i = 0; i < 2; i++)
+			{
+
+				OneVsOne.hero[i].hpPerc = (float)(OneVsOne.hero[i].hp) / (float)(OneVsOne.hero[i].maxHp);
+
+			}
+		}
+
 
         public static int healLogic()
         {
@@ -96,6 +134,7 @@ namespace BHtest
             }
             return lowest;
         }
+			
 
         public static int targetSelection(int method)
         {
@@ -296,5 +335,99 @@ namespace BHtest
         }
 
 
+		public static void combatExecution(int k, int attackValue) {
+			//int targetMethod = 0;
+			int initialTarget = 0;
+			int target = 0;
+			bool blockRoll, evadeRoll, deflectRoll;
+			if (target == k) {
+				target = 1;
+				initialTarget = 1;
+			}
+
+
+			deflectRoll = Logic.RNGroll (OneVsOne.hero [target].deflectChance);
+			//while loop that takes in account potentially infinite delfect loops
+			while (deflectRoll) {
+				Console.WriteLine ("{0} deflected the attack!\n", OneVsOne.hero[target].heroName);
+				if (target != k) {
+					target = k;
+				} else {
+					target = initialTarget;
+				}
+				deflectRoll = Logic.RNGroll (OneVsOne.hero [target].deflectChance);
+			}
+			//
+
+			//following IFs statements to take account of defensive stats of OneVsOne.hero
+			if (!deflectRoll)
+			{
+				evadeRoll = Logic.RNGroll(OneVsOne.hero[target].evadeChance);
+				if (!evadeRoll)
+				{
+					blockRoll = Logic.RNGroll(OneVsOne.hero[target].blockChance);
+					if (blockRoll)
+					{
+						Console.WriteLine("block successful! {0} dealt {1} on {2}\n", OneVsOne.hero[k].heroName, Convert.ToInt32(0.5 * attackValue), OneVsOne.hero[target].heroName);
+						OneVsOne.hero[target].hp -= Convert.ToInt32(0.5 * attackValue);
+						PetLogic.petSelection1v1(k);
+						if (OneVsOne.hero [target].damageReturn > 0f) {
+							OneVsOne.hero [k].hp = OneVsOne.hero [k].hp - Convert.ToInt32(0.5 * attackValue * OneVsOne.hero [target].damageReturn);
+						}
+						if (OneVsOne.hero [k].lifeSteal > 0f) {
+							OneVsOne.hero [k].hp = OneVsOne.hero [k].hp + Convert.ToInt32 (attackValue * OneVsOne.hero [k].lifeSteal);
+						}
+						if (OneVsOne.hero [k].drain) {
+							Console.WriteLine ("{0} has drained for {1} hp\n", OneVsOne.hero [k].heroName, Convert.ToInt32(0.5 * attackValue));
+							OneVsOne.hero [k].hp += Convert.ToInt32(0.5 * attackValue);
+						}
+						if (OneVsOne.hero[target].hp <= 0)
+						{
+							OneVsOne.hero[target].alive = false;
+							//Console.WriteLine ("{0} died\n", OneVsOne.hero [target].heroName);
+						}
+						else
+						{
+							PetLogic.petSelection1v1(target);
+						}
+					}
+					else
+					{
+						Console.WriteLine("{0} dealt {1} on {2}\n", OneVsOne.hero[k].heroName, attackValue, OneVsOne.hero[target].heroName);
+						OneVsOne.hero[target].hp -= attackValue;
+						PetLogic.petSelection1v1(k);
+						if (OneVsOne.hero [target].damageReturn > 0f) {
+							OneVsOne.hero [k].hp = OneVsOne.hero [k].hp - Convert.ToInt32(attackValue * OneVsOne.hero [target].damageReturn);
+						}
+						if (OneVsOne.hero [k].drain) {
+							Console.WriteLine ("{0} has drained for {1} hp\n", OneVsOne.hero [k].heroName, attackValue);
+							OneVsOne.hero [k].hp += attackValue;
+						}
+						if (OneVsOne.hero [k].lifeSteal > 0f) {
+							OneVsOne.hero [k].hp = OneVsOne.hero [k].hp + Convert.ToInt32 (attackValue * OneVsOne.hero [k].lifeSteal);
+						}
+						if (OneVsOne.hero[target].hp <= 0)
+						{
+							OneVsOne.hero[target].alive = false;
+						}
+						else
+						{
+							PetLogic.petSelection1v1(target);
+						}
+					}
+				}
+				else
+				{ 
+					Console.WriteLine("evade successful for {0}!\n", OneVsOne.hero[target].heroName); 
+				}
+			}
+			for (int i = 0; i < 2; i++) {
+				if (OneVsOne.hero [i].hp <= 0) {
+					OneVsOne.hero[i].alive = false;
+					Console.WriteLine ("{0} died\n", OneVsOne.hero [i].heroName);
+				}
+			}
+			Console.WriteLine ("{0} hp = {1} ; {2} hp = {3}\n", OneVsOne.hero [0].heroName, OneVsOne.hero [0].hp, OneVsOne.hero [1].heroName, OneVsOne.hero [1].hp);
+		}
     }
 }

@@ -32,10 +32,14 @@ namespace BHtest
         public float powerRunes;
         public float staminaRunes;
         public float agilityRunes;
+		public float healthRunes;
+		public float lifeSteal;
+		public float damageReturn;
 
         // state
         public bool alive;
-
+		public bool unity;
+		public bool drain;
         // Pet
         public string pet;
         public enum Pet
@@ -50,8 +54,11 @@ namespace BHtest
             bow,
             spear,
             sword,
-            staff
+            staff,
+			axe
         }
+
+		public string heroName;
         // Predefined Heroes
         public static readonly Dictionary<string, Hero> predefined = new Dictionary<string, Hero>() {
         {
