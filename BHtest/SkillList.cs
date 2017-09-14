@@ -187,8 +187,7 @@ namespace BHtest
 			return attackValue;
 		}
 		public static int aSpreadHealt3sp (int power, float critChance, float critDamage) {
-			Random rnd = new Random(Guid.NewGuid().GetHashCode());
-			//add spread healing
+			
 			return 0;
 		}
 
@@ -205,7 +204,7 @@ namespace BHtest
 			return attackValue;
 		}
 		public static int stHeal1sp (int power, float critChance, float critDamage) {
-			Random rnd = new Random(Guid.NewGuid().GetHashCode());
+			
 			//heal
 			return 0;
 		}

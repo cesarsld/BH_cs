@@ -13,7 +13,7 @@ namespace BHtest
             bool outcome;
             float chance = a * 10f;
             float roll = rnd.Next(0, 1000);
-            if (roll <= chance)
+            if (roll < chance)
             {
                 outcome = true;
             }

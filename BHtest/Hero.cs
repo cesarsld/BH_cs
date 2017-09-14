@@ -14,6 +14,8 @@ namespace BHtest
         // Combat Stats
         public int hp;
         public int maxHp;
+		public int shield;
+		public int maxShield;
         public int sp;
         public float hpPerc;
         public float turnRate;
@@ -27,6 +29,7 @@ namespace BHtest
         public float blockChance;
         public float evadeChance;
         public float deflectChance;
+		public float absorbChance;
 
         // Runes
         public float powerRunes;
@@ -35,6 +38,7 @@ namespace BHtest
 		public float healthRunes;
 		public float lifeSteal;
 		public float damageReturn;
+		public float damageReduction;
 
         // state
         public bool alive;
@@ -42,11 +46,15 @@ namespace BHtest
 		public bool drain;
         // Pet
         public string pet;
+		public Pet currentPet;
         public enum Pet
         {
             None,
             Nelson,
-            Gemmi
+            Gemmi,
+			Boiguh,
+			Luvboi,
+			Boogie
         }
         public Weapon weapon;
         public enum Weapon

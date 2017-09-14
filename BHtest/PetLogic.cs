@@ -133,13 +133,12 @@ namespace BHtest
 		public static void spreadHealPet1v1(int l)
 		{
 			Random rnd = new Random(Guid.NewGuid().GetHashCode());
-			//int i;
-			//int target = 0;
+
 			int healModifier = Convert.ToInt32(OneVsOne.hero[l].power * 0.14);
 			int healValue = Convert.ToInt32(rnd.Next(0, healModifier) + 0.66 * OneVsOne.hero[l].power);
 
 			bool critRoll = Logic.RNGroll(OneVsOne.hero[l].critChance);
-			bool petRoll = Logic.RNGroll((float)20);
+			bool petRoll = Logic.RNGroll(20f);
 
 			if (critRoll)
 			{
