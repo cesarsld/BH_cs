@@ -86,7 +86,7 @@ namespace BHtest
 		static void TankSim()
 		{
 			int counterMax = 100;
-			int baseDamage = 50;
+			int baseDamage = 10;
 			int damageMultiplier = 0;
 			int currentDamage;
 			int i;
@@ -96,19 +96,19 @@ namespace BHtest
 			int multiplierSum = 0;
 
 			Hero hero = new Hero ();
-			hero.power = 480;
-			hero.stamina = 1080;
-			hero.agility = 142;
+			hero.power = 599;
+			hero.stamina = 1116;
+			hero.agility = 77;
 			hero.sp = 4;
 			hero.shield = 0;
 			hero.critChance = 10f;
 			hero.critDamage = 1.5f;
 			hero.dsChance = 0f;
-			hero.blockChance = 32.8f;
-			hero.evadeChance = 21.7f;
-			hero.deflectChance = 8.9f;
-			hero.absorbChance = 6f;
-			hero.damageReduction = 1f;
+			hero.blockChance = 23.6f;
+			hero.evadeChance = 4.4f;
+			hero.deflectChance = 13.55f;
+			hero.absorbChance = 13.5f;
+			hero.damageReduction = 0.8f;
 			hero.powerRunes = 0f;
 			hero.agilityRunes = 0f;
 			hero.pet = "gemmi";
@@ -127,7 +127,7 @@ namespace BHtest
 
 			for (j = 0; j < runs; j++) {
 				hero.alive = true;
-				damageMultiplier = 0;
+				damageMultiplier = Convert.ToInt32(hero.maxHp / 1000);
 				while (hero.alive) {
 					damageMultiplier++;
 					currentDamage = baseDamage * damageMultiplier;
@@ -247,9 +247,12 @@ namespace BHtest
 			float shieldValue = Convert.ToInt32(rnd.Next(0, shieldModifier) + 0.27 * hero.power);
 
 			bool petRoll = Logic.RNGroll(20f);
-
-
-			if (petRoll)
+            bool critRoll = Logic.RNGroll(10f);
+            if (critRoll)
+            {
+                shieldValue *= 1.5f;
+            }
+            if (petRoll)
 			{
 				if (hero.hp > 0) 
 				{
@@ -268,9 +271,10 @@ namespace BHtest
 			int i;
 			int healModifier = Convert.ToInt32(hero.power * 0.072);
 			float healValue = Convert.ToInt32(rnd.Next(0, healModifier) + 0.324 * hero.power);
-			bool critoll = Logic.RNGroll (10f);
+			
 			bool petRoll = Logic.RNGroll(22f);
 
+            bool critoll = Logic.RNGroll (10f);
 			if (critoll) {
 				healValue *= 1.5f;
 			}
@@ -299,8 +303,13 @@ namespace BHtest
 			int healValue = Convert.ToInt32(rnd.Next(0, healModifier) + 0.66 * hero.power);
 
 			bool petRoll = Logic.RNGroll(20f);
+            bool critoll = Logic.RNGroll(10f);
+            if (critoll)
+            {
+                healValue = Convert.ToInt32(healValue*1.5f);
+            }
 
-			if (petRoll)
+            if (petRoll)
 			{
 				hero.hp += healValue;
 				if (hero.hp > hero.maxHp)
