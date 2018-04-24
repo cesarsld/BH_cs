@@ -1,280 +1,243 @@
-﻿using System;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Text;
+using System;
+using System.Linq;
 
-namespace BHtest
+public enum PetAbilty
 {
-    class PetLogic
+    TeamHeal,
+    SpreahHeal,
+    SelfHeal,
+    WeakestHeal,
+    TeamShield,
+    TeamHealShield,
+    AOEAttack,
+    ClosestAttack,
+    RandomAttack,
+    WeakestAttack
+}
+public enum PetProcType
+{
+    GetHit,
+    PerTurn,
+    PerHit,
+    AllType
+}
+
+public class Pet
+{
+    public static Random random = new Random(Guid.NewGuid().GetHashCode());
+    private float ProcChance;
+    private float Scaling;
+    private float Range;
+    private PetAbilty petAbility;
+    public PetProcType petProcType;
+    private int Value;
+
+    private bool IsCrit;
+    private bool IsEmp;
+
+    public Pet(float procChance, float scaling, float range, PetAbilty _petAbility, PetProcType _petProcType)
     {
+        ProcChance = procChance;
+        Scaling = scaling / 100f;
+        Range = range / 100f;
+        petAbility = _petAbility;
+        petProcType = _petProcType;
+    }
+    public Pet()
+    {
+        ProcChance = 0;
+        petProcType = PetProcType.AllType;
+    }
+    private void StoreRandomFactors(Character author)
+    {
+        IsCrit = Logic.RNGroll(author.critChance);
+        IsEmp = Logic.RNGroll(author.empowerChance);
+    }
 
-        public static void offPetProc(int l)
+    private void GetValue(Character author)
+    {
+        int attackModifier = Convert.ToInt32(Scaling * Range * author.power);
+        int returnValue = 0;
+        int mod = Convert.ToInt32(Math.Pow(-1, random.Next(2)));
+        returnValue = Convert.ToInt32(author.power * Scaling + random.Next(attackModifier) * mod);
+
+        if (IsCrit)
         {
-            Random rnd = new Random(Guid.NewGuid().GetHashCode());
-            int attackModifier = Convert.ToInt32(0.54 * Simulation.hero[l].power);
-            int attackValue = Convert.ToInt32(rnd.Next(0, attackModifier) + Simulation.hero[l].power * 0.63);
-
-
-            bool critRoll = Logic.RNGroll(Simulation.hero[l].critChance);
-            bool petRoll = Logic.RNGroll((float)20);
-
-            if (critRoll)
-            {
-                attackValue = Convert.ToInt32(attackValue * Simulation.hero[l].critDamage);
-            }
-            if (petRoll)
-            {
-                Simulation.hpDummy -= attackValue;
-                //Console.WriteLine("\npet proc successful\n");
-            }
-
+            returnValue = Convert.ToInt32(returnValue * author.critDamage);
         }
-
-		public static void offPetProc1v1(int l)
-		{
-			Random rnd = new Random(Guid.NewGuid().GetHashCode());
-			int attackModifier = Convert.ToInt32(0.54 * OneVsOne.hero[l].power);
-			int attackValue = Convert.ToInt32(rnd.Next(0, attackModifier) + OneVsOne.hero[l].power * 0.63);
-			int target = 0;
-			if (l == 0) {
-				target = 1;
-			}
-
-
-			bool critRoll = Logic.RNGroll(OneVsOne.hero[l].critChance);
-			bool petRoll = Logic.RNGroll((float)20);
-
-			if (critRoll)
-			{
-				attackValue = Convert.ToInt32(attackValue * OneVsOne.hero[l].critDamage);
-			}
-			if (petRoll)
-			{
-				Console.WriteLine ("{0}'s pet proced dealing {1} damage!\n", OneVsOne.hero[l].heroName, attackValue);
-				OneVsOne.hero[target].hp -= attackValue;
-			}
-
-		}
-
-        public static void superOffPetProc(int l)
+        if (IsEmp)
         {
-            Random rnd = new Random(Guid.NewGuid().GetHashCode());
-            int attackModifier = Convert.ToInt32(Simulation.hero[l].power * 0.37);
-            int attackValue = Convert.ToInt32(rnd.Next(0, attackModifier) + Simulation.hero[l].power * 1.668);
-
-
-            bool critRoll = Logic.RNGroll(Simulation.hero[l].critChance);
-            bool petRoll = Logic.RNGroll((float)10);
-
-            if (critRoll)
-            {
-                attackValue = Convert.ToInt32(attackValue * Simulation.hero[l].critDamage);
-            }
-            if (petRoll)
-            {
-                Simulation.hpDummy -= attackValue;
-            }
-
+            returnValue *= 2;
         }
+        Value = returnValue;
+    }
 
-		public static void superOffPetProc1v1(int l)
-		{
-			Random rnd = new Random(Guid.NewGuid().GetHashCode());
-			int attackModifier = Convert.ToInt32(OneVsOne.hero[l].power * 0.37);
-			int attackValue = Convert.ToInt32(rnd.Next(0, attackModifier) + OneVsOne.hero[l].power * 1.668);
-			int target = 0;
-			if (l == 0) {
-				target = 1;
-			}
-
-			bool critRoll = Logic.RNGroll(OneVsOne.hero[l].critChance);
-			bool petRoll = Logic.RNGroll((float)10);
-
-			if (critRoll)
-			{
-				attackValue = Convert.ToInt32(attackValue * OneVsOne.hero[l].critDamage);
-			}
-			if (petRoll)
-			{
-				Console.WriteLine ("{0}'s pet proced dealing {1} damage!\n", OneVsOne.hero[l].heroName, attackValue);
-				OneVsOne.hero[target].hp -= attackValue;
-			}
-
-		}
-
-        public static void spreadHealPet(int l)
+    public void PetSelection(Character author, Character[] party, Character[] enemies, PetProcType currentPetProcType)
+    {
+        if (petProcType == currentPetProcType || petProcType == PetProcType.AllType)
         {
-            Random rnd = new Random(Guid.NewGuid().GetHashCode());
-            int i;
-            int target = 0;
-            int healModifier = Convert.ToInt32(Simulation.hero[l].power * 0.14);
-            int healValue = Convert.ToInt32(rnd.Next(0, healModifier) + 0.66 * Simulation.hero[l].power);
-
-            bool critRoll = Logic.RNGroll(Simulation.hero[l].critChance);
-            bool petRoll = Logic.RNGroll((float)20);
-
-            if (critRoll)
+            if (Logic.RNGroll(ProcChance))
             {
-                healValue = Convert.ToInt32(healValue * Simulation.hero[l].critDamage);
-            }
-            if (petRoll)
-            {
-                for (i = 0; i < healValue; i++)
+                StoreRandomFactors(author);
+                GetValue(author);
+                switch (petAbility)
                 {
-                    target = Logic.healLogic();
-                    Simulation.hero[target].hp++;
-                    if (Simulation.hero[target].hp > Simulation.hero[target].maxHp)
-                    {
-                        Simulation.hero[target].hp = Simulation.hero[target].maxHp;
-                    }
+                    case PetAbilty.TeamHeal:
+                        TeamHeal(party);
+                        break;
+                    case PetAbilty.SpreahHeal:
+                        SpreadHeal(party);
+                        break;
+                    case PetAbilty.SelfHeal:
+                        SelfHeal(author);
+                        break;
+                    case PetAbilty.WeakestHeal:
+                        WeakestHeal(party);
+                        break;
+                    case PetAbilty.TeamHealShield:
+                        TeamHealShield(party);
+                        break;
+                    case PetAbilty.TeamShield:
+                        TeamShield(party);
+                        break;
+                    case PetAbilty.ClosestAttack:
+                        ClosestAttack(enemies);
+                        break;
+                    case PetAbilty.WeakestAttack:
+                        WeakestAttack(enemies);
+                        break;
+                    case PetAbilty.AOEAttack:
+                        AoeAttack(enemies);
+                        break;
+                    case PetAbilty.RandomAttack:
+                        RandomAttack(enemies);
+                        break;
                 }
             }
         }
-
-		public static void spreadHealPet1v1(int l)
-		{
-			Random rnd = new Random(Guid.NewGuid().GetHashCode());
-
-			int healModifier = Convert.ToInt32(OneVsOne.hero[l].power * 0.14);
-			int healValue = Convert.ToInt32(rnd.Next(0, healModifier) + 0.66 * OneVsOne.hero[l].power);
-
-			bool critRoll = Logic.RNGroll(OneVsOne.hero[l].critChance);
-			bool petRoll = Logic.RNGroll(20f);
-
-			if (critRoll)
-			{
-				healValue = Convert.ToInt32(healValue * OneVsOne.hero[l].critDamage);
-			}
-			if (petRoll)
-			{
-				Console.WriteLine ("{0}'s pet proced healing for {1} hp!\n", OneVsOne.hero[l].heroName, healValue);
-				OneVsOne.hero[l].hp += healValue;
-				if (OneVsOne.hero[l].hp > OneVsOne.hero[l].maxHp)
-				{
-					OneVsOne.hero[l].hp = OneVsOne.hero[l].maxHp;
-				}
-				
-			}
-		}
-
-		public static void superSpreadHealPet1v1(int l)
-		{
-			Random rnd = new Random(Guid.NewGuid().GetHashCode());
-			//int i;
-			//int target = 0;
-			int healModifier = Convert.ToInt32(OneVsOne.hero[l].power * 0.30);
-			int healValue = Convert.ToInt32(rnd.Next(0, healModifier) + 1.30 * OneVsOne.hero[l].power);
-
-			bool critRoll = Logic.RNGroll(OneVsOne.hero[l].critChance);
-			bool petRoll = Logic.RNGroll((float)10);
-
-			if (critRoll)
-			{
-				healValue = Convert.ToInt32(healValue * OneVsOne.hero[l].critDamage);
-			}
-			if (petRoll)
-			{
-				Console.WriteLine ("{0}'s pet proced healing for {1} hp!\n", OneVsOne.hero[l].heroName, healValue);
-				OneVsOne.hero[l].hp += healValue;
-				if (OneVsOne.hero[l].hp > OneVsOne.hero[l].maxHp)
-				{
-					OneVsOne.hero[l].hp = OneVsOne.hero[l].maxHp;
-				}
-
-			}
-		}
-
-		public static void superSelfHealPet1v1(int l)
-		{
-			Random rnd = new Random(Guid.NewGuid().GetHashCode());
-			//int i;
-			//int target = 0;
-			int healModifier = Convert.ToInt32(OneVsOne.hero[l].power * 0.56);
-			int healValue = Convert.ToInt32(rnd.Next(0, healModifier) + 0.89 * OneVsOne.hero[l].power);
-
-			bool critRoll = Logic.RNGroll(OneVsOne.hero[l].critChance);
-			bool petRoll = Logic.RNGroll((float)10);
-
-			if (critRoll)
-			{
-				healValue = Convert.ToInt32(healValue * OneVsOne.hero[l].critDamage);
-			}
-			if (petRoll)
-			{
-				Console.WriteLine ("{0}'s pet proced healing for {1} hp!\n", OneVsOne.hero[l].heroName, healValue);
-				OneVsOne.hero[l].hp += healValue;
-				if (OneVsOne.hero[l].hp > OneVsOne.hero[l].maxHp)
-				{
-					OneVsOne.hero[l].hp = OneVsOne.hero[l].maxHp;
-				}
-
-			}
-		}
-
-        // strcmp to find what pet Simulation.hero is using
-        public static void petSelection(int k)
-        {
-            bool petCheck;
-            petCheck = string.Equals(Simulation.hero[k].pet, "gemmi");
-            if (petCheck)
-            {
-                Logic.teamHeal(k);
-            }
-            petCheck = string.Equals(Simulation.hero[k].pet, "nelson");
-            if (petCheck)
-            {
-                offPetProc(k);
-            }
-            petCheck = string.Equals(Simulation.hero[k].pet, "boogie");
-            if (petCheck)
-            {
-                spreadHealPet(k);
-            }
-            petCheck = string.Equals(Simulation.hero[k].pet, "nemo");
-            if (petCheck)
-            {
-                superOffPetProc(k);
-            }
-
-        }
-
-		public static void petSelection1v1(int k)
-		{
-			bool petCheck;
-			petCheck = string.Equals(OneVsOne.hero[k].pet, "gemmi");
-			if (petCheck)
-			{
-				Logic.teamHeal1v1(k);
-			}
-			petCheck = string.Equals(OneVsOne.hero[k].pet, "nelson");
-			if (petCheck)
-			{
-				offPetProc1v1(k);
-			}
-			petCheck = string.Equals(OneVsOne.hero[k].pet, "boogie");
-			if (petCheck)
-			{
-				spreadHealPet1v1(k);
-			}
-			petCheck = string.Equals(OneVsOne.hero[k].pet, "nemo");
-			if (petCheck)
-			{
-				superOffPetProc1v1(k);
-			}
-			petCheck = string.Equals(OneVsOne.hero[k].pet, "crem");
-			if (petCheck)
-			{
-				superSpreadHealPet1v1(k);
-			}
-			petCheck = string.Equals(OneVsOne.hero[k].pet, "nerder");
-			if (petCheck)
-			{
-				superSelfHealPet1v1(k);
-			}
-
-
-
-		}
-
-
     }
+
+    private void TeamHeal(Character[] party)
+    {
+        for (int i = 0; i < party.Length; i++)
+        {
+            if (party[i].hp > 0)
+            {
+                party[i].hp += Convert.ToInt32(Value);
+                if (party[i].hp >= party[i].maxHp)
+                {
+                    party[i].hp = party[i].maxHp;
+                }
+            }
+        }
+    }
+    private void SpreadHeal(Character[] party)
+    {
+        Character target;
+        for (int i = 0; i < 10; i++)
+        {
+            target = Logic.HealFindWeakestPerc(party);
+            target.hp += Value / 10;
+            if (target.hp > target.maxHp)
+            {
+                target.hp = target.maxHp;
+            }
+        }
+    }
+    private void TeamShield(Character[] party)
+    {
+        for (int i = 0; i < party.Length; i++)
+        {
+            if (party[i].hp > 0)
+            {
+                party[i].shield += Convert.ToInt32(Value);
+                if (party[i].shield >= party[i].maxShield)
+                {
+                    party[i].shield = party[i].maxShield;
+                }
+            }
+        }
+    }
+    private void SelfHeal(Character author)
+    {
+        author.hp += Value;
+        if (author.hp > author.maxHp)
+        {
+            author.hp = author.maxHp;
+        }
+    }
+    private void TeamHealShield(Character[] party)
+    {
+        for (int i = 0; i < party.Length; i++)
+        {
+            if (party[i].hp > 0)
+            {
+                party[i].hp += Convert.ToInt32(Value);
+                if (party[i].hp >= party[i].maxHp)
+                {
+                    party[i].hp = party[i].maxHp;
+                }
+                party[i].shield += Convert.ToInt32(Value);
+                if (party[i].shield >= party[i].maxShield)
+                {
+                    party[i].shield = party[i].maxShield;
+                }
+            }
+        }
+    }
+    private void WeakestHeal(Character[] party)
+    {
+        Character target = Logic.HealFindWeakestPerc(party);
+        target.hp += Value;
+        if (target.hp > target.maxHp)
+        {
+            target.hp = target.maxHp;
+        }
+    }
+    private void AoeAttack(Character[] enemies)
+    {
+        for (int i = 0; i < enemies.Length; i++)
+        {
+            if (enemies[i].hp > 0)
+            {
+                enemies[i].hp -= Value;
+            }
+        }
+    }
+    private void ClosestAttack(Character[] enemies)
+    {
+        for (int i = 0; i < enemies.Length; i++)
+        {
+            if (enemies[i].hp > 0)
+            {
+                enemies[i].hp -= Value;
+                break;
+            }
+        }
+    }
+    private void WeakestAttack(Character[] enemies)
+    {
+        int target = 0;
+        for (int i = 1; i < enemies.Length; i++)
+        {
+            if (enemies[target].hp > enemies[i].hp && enemies[i].alive) target = i;
+        }
+        enemies[target].hp -= Value;
+    }
+    private void RandomAttack(Character[] enemies)
+    {
+        while (true)
+        {
+            int target = random.Next(enemies.Length);
+            if (WorldBossSimulation.GetPartyCount(enemies) > 0 && enemies[target].hp > 0)
+            {
+                enemies[target].hp -= Value;
+                return;
+            }
+            else return;
+        }
+    }
+
 }

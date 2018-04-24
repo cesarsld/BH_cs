@@ -6,10 +6,10 @@ namespace BHtest
 {
     public class OneVsOne
     {
-        public static Hero[] hero = new Hero[2];
-		public static Hero[] enemy = new Hero[1];
-		public const int heroCount = 2;
-		public const int enemyCount = 1;
+        public static Character[] hero = new Character[2];
+        public static Character[] enemy = new Character[1];
+        public const int heroCount = 2;
+        public const int enemyCount = 1;
 
 
         public static void duel()
@@ -18,10 +18,13 @@ namespace BHtest
             int cycle;
             int i;
             bool DS;
-			bool firstTurn = true;
-			int p1 = 0;
-			int p2 = 0;
-			for (int games = 0; games < 5; games++) {
+            bool firstTurn = true;
+            int p1 = 0;
+            int p2 = 0;
+        }
+    }
+}
+			//for (int games = 0; games < 5; games++) {
 				/*hero [0].power = 442;
 				hero [0].stamina = 704;
 				hero [0].agility = 111;
@@ -39,7 +42,7 @@ namespace BHtest
 				hero [0].unity = true;
 				hero [0].weapon = Hero.Weapon.bow;
 				hero [0].heroName = "Byleth";*/
-				Console.WriteLine ("Round {0}\n", games+1);
+				//Console.WriteLine ("Round {0}\n", games+1);
 				// all numbers that have an "f" at the end must keep the "f"
 				/*hero [0].power = 0; // power + stamina + agility must equal 1000 ts
 				hero [0].stamina = 0;
@@ -58,7 +61,7 @@ namespace BHtest
 				hero [0].pet = "gemmi"; // pet available : gemmi, nelson, nemo, boogie, crem, nerder
 				hero [0].weapon = Hero.Weapon.sword; // weapons available: axe, staff, sword, bow, spear
 				hero [0].heroName = "Shadown";*/
-
+                /*
 				hero [0].power = 475;
 				hero [0].stamina = 524;
 				hero [0].agility = 1;
@@ -74,7 +77,7 @@ namespace BHtest
 				hero [0].lifeSteal = 0f;
 				hero [0].damageReturn = 0f;
 				hero [0].pet = "nelson"; // pet available : gemmi, nelson, nemo, boogie, crem, nerder
-				hero [0].weapon = Hero.Weapon.staff;
+				hero [0].weapon = Character.Weapon.staff;
 				hero [0].heroName = "etmott";
 
 				hero [1].power = 450; 
@@ -92,7 +95,7 @@ namespace BHtest
 				hero [1].lifeSteal = 0f;
 				hero [1].damageReturn = 0f;
 				hero [1].pet = "nemo"; // fully upgraded (4/4)
-				hero [1].weapon = Hero.Weapon.spear; 
+				hero [1].weapon = Character.Weapon.spear; 
 				hero [1].heroName = "TheJoseph98"; 
 			
 				/*=================================================================================*/
@@ -426,7 +429,7 @@ maykah				    	   check
 				hero [1].pet = "nelson";
 				hero [1].unity = true;
 				hero [1].weapon = Hero.Weapon.sword;
-				hero [1].heroName = "Shadown";*/
+				hero [1].heroName = "Shadown";
 
 				for (i = 0; i < 2; i++) {  //initialisation
 					hero [i].drain = false;
@@ -493,4 +496,4 @@ maykah				    	   check
 			Console.WriteLine("{0} {1} : {2} {3}",hero[0].heroName, p1, hero[1].heroName, p2);
         }
     }
-}
+}*/

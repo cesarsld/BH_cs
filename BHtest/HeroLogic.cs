@@ -1,1059 +1,1259 @@
-﻿using System;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Text;
+using System;
 
-namespace BHtest
+/*
+
+class HeroLogic
 {
-    class HeroLogic
+    private static Random rnd = new Random(Guid.NewGuid().GetHashCode());
+
+    public static void SpreadHealingSkill(int k)
     {
+        int i;
+        int target = 0;
+        int healingValue = 0;
+        int healingModifier = Convert.ToInt32(0.365 * RaidSimulation.hero[k].power);
 
-        public static void spreadHealingSkill(int k)
+        healingValue = Convert.ToInt32(rnd.Next(healingModifier) + 0.73 * RaidSimulation.hero[k].power);
+
+        bool critRoll = Logic.RNGroll(RaidSimulation.hero[k].critChance);
+        if (critRoll)
         {
-            Random rnd = new Random(Guid.NewGuid().GetHashCode());
-            int i;
-            int target = 0;
-            int healingValue = 0;
-            int healingModifier = Convert.ToInt32(0.365 * Simulation.hero[k].power);
-
-            healingValue = Convert.ToInt32(rnd.Next(0, healingModifier) + 0.73 * Simulation.hero[k].power);
-
-            bool critRoll = Logic.RNGroll(Simulation.hero[k].critChance);
-            if (critRoll)
-            {
-                healingValue = Convert.ToInt32(healingValue * Simulation.hero[k].critDamage);
-            }
-
-            for (i = 0; i < healingValue; i++)
-            {
-                target = Logic.healLogic();
-                Simulation.hero[target].hp++;
-                if (Simulation.hero[target].hp > Simulation.hero[target].maxHp)
-                {
-                    Simulation.hero[target].hp = Simulation.hero[target].maxHp;
-                }
-            }
+            healingValue = Convert.ToInt32(healingValue * RaidSimulation.hero[k].critDamage);
         }
 
-        public static void heroAttack(int k, bool dual)
+        for (i = 0; i < healingValue; i++)
         {
-            Random rnd = new Random(Guid.NewGuid().GetHashCode());
-            int skillSelection;
-            int attackValue = 0;
-            bool hasHealed = false;
-            int attackModifier = Convert.ToInt32(0.2 * Simulation.hero[k].power);
-            attackValue = Convert.ToInt32(rnd.Next(0, attackModifier) + 0.9f * Simulation.hero[k].power);
-            if (Simulation.hero[k].sp >= 2)
+            target = Logic.HealLogic();
+            RaidSimulation.hero[target].hp++;
+            if (RaidSimulation.hero[target].hp > RaidSimulation.hero[target].maxHp)
             {
-                skillSelection = rnd.Next(0, 100);
-                if (skillSelection < 20 && (Simulation.hero[0].hpPerc < 0.85f || Simulation.hero[4].hpPerc < 0.85f))
-                {
-                    spreadHealingSkill(k);
-                    hasHealed = true;
-                    if (!dual)
-                    {
-                        Simulation.hero[k].sp -= 2;
-                    }
-                }
-                else
-                {
-                    float skillModifier = rnd.Next(0, 50) + 110;
-                    skillModifier /= 100;
-                    attackValue = Convert.ToInt32(Simulation.hero[k].power * skillModifier);
-                    if (!dual)
-                    {
-                        Simulation.hero[k].sp -= 2;
-                    }
-                }
+                RaidSimulation.hero[target].hp = RaidSimulation.hero[target].maxHp;
             }
-            bool critRoll = Logic.RNGroll(Simulation.hero[k].critChance);
-            if (critRoll)
-            {
-                attackValue = Convert.ToInt32(attackValue * Simulation.hero[k].critDamage);
-            }
-            bool evadeRoll = Logic.RNGroll(2.5f);
-            if (!evadeRoll && hasHealed == false)
-            {
-                Simulation.hpDummy -= attackValue;
-                PetLogic.petSelection(k);
-            }
-        }
-
-        public static void heroAttackTarget(int k, bool dual, int target)
-        {
-            Random rnd = new Random(Guid.NewGuid().GetHashCode());
-            int skillSelection;
-            int attackValue = 0;
-            bool hasHealed = false;
-			int attackModifier = Convert.ToInt32(0.2 * OneVsOne.hero[k].power);
-			attackValue = Convert.ToInt32(rnd.Next(0, attackModifier) + 0.9f * OneVsOne.hero[k].power);
-			if (OneVsOne.hero[k].sp >= 2)
-            {
-                skillSelection = rnd.Next(0, 100);
-				if (skillSelection < 20 && (OneVsOne.hero[0].hpPerc < 0.85f || OneVsOne.hero[4].hpPerc < 0.85f))
-                {
-                    spreadHealingSkill(k);
-                    hasHealed = true;
-                    if (!dual)
-                    {
-						OneVsOne.hero[k].sp -= 2;
-                    }
-                }
-                else
-                {
-                    float skillModifier = rnd.Next(0, 50) + 110;
-                    skillModifier /= 100;
-					attackValue = Convert.ToInt32(OneVsOne.hero[k].power * skillModifier);
-                    if (!dual)
-                    {
-						OneVsOne.hero[k].sp -= 2;
-                    }
-                }
-            }
-			bool critRoll = Logic.RNGroll(OneVsOne.hero[k].critChance);
-            if (critRoll)
-            {
-				attackValue = Convert.ToInt32(attackValue * OneVsOne.hero[k].critDamage);
-            }
-            bool evadeRoll = Logic.RNGroll(2.5f);
-            if (!evadeRoll && hasHealed == false)
-            {
-                target -= attackValue;
-                PetLogic.petSelection1v1(k);
-            }
-        }
-
-		public static void swordSkillSelection(int k, int sp, bool unity, bool DS) {
-			Random rnd = new Random(Guid.NewGuid().GetHashCode());
-			int attackValue = 0;
-			int skillRoll = 0;
-			//int targetMethod = 0;
-
-			if (sp < 2)
-			{
-				attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-				Logic.combatExecution (k, attackValue);
-				if (DS) {
-					attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-					Logic.combatExecution (k, attackValue);
-				}
-			}
-			else if (sp < 4)
-			{
-				// 1 sp skill AI
-				skillRoll = rnd.Next(0, 100);
-				if (skillRoll < 20)
-				{
-					attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-				else if (skillRoll >= 2440 && skillRoll < 0)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.sPierce3_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.sPierce3_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-				else if (skillRoll >= 20)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.sTarget_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.sTarget_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-			}
-			else if (sp < 6)
-			{
-				// 1 - 2 sp skill AI
-				skillRoll = rnd.Next(0, 100);
-				if (skillRoll < 20)
-				{
-					attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-					Logic.combatExecution(k, attackValue);
-					if (DS) {
-						attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-						Logic.combatExecution(k, attackValue);
-					}
-				}
-				else if (skillRoll >= 1445 && skillRoll < 55)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.sPierce3_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.sPierce3_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-				else if (skillRoll >= 20 && skillRoll < 1000)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.sTarget_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.sTarget_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-				else if (skillRoll >= 995)
-				{
-					OneVsOne.hero [k].sp -= 4;
-					attackValue = SkillList.sAoe2sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.sAoe2sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-			}
-			else if (sp < 8)
-			{
-				// 1 - 2 sp skill AI
-				skillRoll = rnd.Next(0, 100);
-				if (skillRoll < 20)
-				{
-					attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-					Logic.combatExecution(k, attackValue);
-					if (DS) {
-						attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-						Logic.combatExecution(k, attackValue);
-					}
-				}
-				else if (skillRoll >= 555 && skillRoll < 50)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.sPierce3_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.sPierce3_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-				else if (skillRoll >= 20 && skillRoll < 80)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.sTarget_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.sTarget_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-				else if (skillRoll >= 80)
-				{
-					OneVsOne.hero [k].sp -= 6;
-					OneVsOne.hero [k].drain = true;
-					attackValue = SkillList.sClosest3sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.sClosest3sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-					OneVsOne.hero [k].drain = false;
-				}
-			}
-			else if (sp == 8)
-			{
-				// 1 - 2 sp skill AI
-				skillRoll = rnd.Next(0, 100);
-				if (skillRoll < 0)
-				{
-					attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-					Logic.combatExecution(k, attackValue);
-					if (DS) {
-						attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-						Logic.combatExecution(k, attackValue);
-					}
-				}
-				else if (skillRoll >= 110 && skillRoll < 45)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.sPierce3_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.sPierce3_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-				else if (skillRoll >= 0 && skillRoll < 70)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.sTarget_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.sTarget_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-				else if (skillRoll >= 70)
-				{
-					OneVsOne.hero [k].sp -= 6;
-					OneVsOne.hero [k].drain = true;
-					attackValue = SkillList.sClosest3sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.sClosest3sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-					OneVsOne.hero [k].drain = false;
-				}
-			}
-		}
-
-		public static void spearSkillSelection(int k, int sp, bool unity, bool DS) { 
-			Random rnd = new Random(Guid.NewGuid().GetHashCode());
-			int attackValue = 0;
-			int skillRoll = 0;
-			//int targetMethod = 0;
-
-			if (sp < 2)
-			{
-				attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-				Logic.combatExecution (k, attackValue);
-				if (DS) {
-					attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-					Logic.combatExecution (k, attackValue);
-				}
-			}
-			else if (sp < 4)
-			{
-				// 1 sp skill AI
-				skillRoll = rnd.Next(0, 100);
-				if (skillRoll < 20)
-				{
-					attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-				else if (skillRoll >= 20 && skillRoll < 101)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.spBack1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.spBack1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-				else if (skillRoll >= 600)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.sPierce3_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.sPierce3_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-			}
-			else if (sp < 6)
-			{
-				// 1 - 2 sp skill AI
-				skillRoll = rnd.Next(0, 100);
-				if (skillRoll < 10)
-				{
-					attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-					Logic.combatExecution(k, attackValue);
-					if (DS) {
-						attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-						Logic.combatExecution(k, attackValue);
-					}
-				}
-				else if (skillRoll >= 10 && skillRoll < 60)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.spBack1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.spBack1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-				else if (skillRoll >= 5555 && skillRoll < 95)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.sPierce3_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.sPierce3_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-				else if (skillRoll >= 60)
-				{
-					OneVsOne.hero [k].sp -= 4;
-					attackValue = SkillList.spTarget2sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.spTarget2sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-			}
-			else if (sp < 8)
-			{
-				// 1 - 2 sp skill AI
-				skillRoll = rnd.Next(0, 100);
-				if (skillRoll < 10)
-				{
-					attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-					Logic.combatExecution(k, attackValue);
-					if (DS) {
-						attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-						Logic.combatExecution(k, attackValue);
-					}
-				}
-				else if (skillRoll >= 10 && skillRoll < 30)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.spBack1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.spBack1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-				else if (skillRoll >= 30 && skillRoll < 60)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.spTarget2sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.spTarget2sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-				else if (skillRoll >= 60)
-				{
-					OneVsOne.hero [k].sp -= 6;
-					attackValue = SkillList.spClosest3sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.spClosest3sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-			}
-			else if (sp == 8)
-			{
-				// 1 - 2 sp skill AI
-				skillRoll = rnd.Next(0, 100);
-				if (skillRoll < 0)
-				{
-					attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-					Logic.combatExecution(k, attackValue);
-					if (DS) {
-						attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-						Logic.combatExecution(k, attackValue);
-					}
-				}
-				else if (skillRoll >= 0 && skillRoll < 20)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.spBack1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.spBack1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-				else if (skillRoll >= 20 && skillRoll < 60)
-				{
-					OneVsOne.hero [k].sp -= 4;
-					attackValue = SkillList.spTarget2sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.spTarget2sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-				else if (skillRoll >= 60)
-				{
-					OneVsOne.hero [k].sp -= 6;
-					attackValue = SkillList.spClosest3sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.spClosest3sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-			}
-
-		}
-
-		public static void bowSkillSelection(int k, int sp, bool unity, bool DS) {
-			Random rnd = new Random(Guid.NewGuid().GetHashCode());
-			int attackValue = 0;
-			int skillRoll = 0;
-			//int targetMethod = 0;
-			if (sp < 2)
-			{
-				attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-				Logic.combatExecution (k, attackValue);
-
-				if (DS) {
-					attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-					Logic.combatExecution (k, attackValue);
-				}
-			}
-			else if (sp < 4)
-			{
-				// 1 sp skill AI
-				skillRoll = rnd.Next(0, 100);
-				if (skillRoll < 20)
-				{
-					attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-				else if (skillRoll >= 20 && skillRoll < 100)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.bTarget1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.bTarget1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-					OneVsOne.hero[k].sp -= 2;
-				}
-				else if (skillRoll == 600)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.bAoe1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.bAoe1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-					OneVsOne.hero[k].sp -= 2;
-				}
-			}
-			else if (sp < 6)
-			{
-				// 1 - 2 sp skill AI
-				skillRoll = rnd.Next(0, 100);
-				if (skillRoll < 15)
-				{
-					attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-					Logic.combatExecution(k, attackValue);
-					if (DS) {
-						attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-						Logic.combatExecution(k, attackValue);
-					}
-				}
-				else if (skillRoll >= 15 && skillRoll < 80)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.bTarget1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.bTarget1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-					OneVsOne.hero[k].sp -= 2;
-				}
-				else if (skillRoll >= 505 && skillRoll < 95)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.bAoe1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.bAoe1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-					OneVsOne.hero[k].sp -= 2;
-				}
-				else if (skillRoll >= 80)
-				{
-					OneVsOne.hero [k].sp -= 4;
-					attackValue = SkillList.bBack2sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.bBack2sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-					OneVsOne.hero[k].sp -= 4;
-				}
-			}
-			else if (sp < 8)
-			{
-				// 1 - 2 sp skill AI
-				skillRoll = rnd.Next(0, 100);
-				if (skillRoll < 5)
-				{
-					attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-					Logic.combatExecution(k, attackValue);
-					if (DS) {
-						attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-						Logic.combatExecution(k, attackValue);
-					}
-				}
-				else if (skillRoll >= 5 && skillRoll < 80)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.bTarget1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.bTarget1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-					OneVsOne.hero[k].sp -= 2;
-				}
-				else if (skillRoll >= 500 && skillRoll < 95)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.bAoe1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.bAoe1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-					OneVsOne.hero[k].sp -= 2;
-				}
-				else if (skillRoll >= 80)
-				{
-					OneVsOne.hero [k].sp -= 4;
-					attackValue = SkillList.bBack2sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.bBack2sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-					OneVsOne.hero[k].sp -= 4;
-				}
-			}
-			else if (sp == 8)
-			{
-				// 1 - 2 sp skill AI
-				skillRoll = rnd.Next(0, 100);
-				if (skillRoll < 0)
-				{
-					attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-					Logic.combatExecution(k, attackValue);
-					if (DS) {
-						attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-						Logic.combatExecution(k, attackValue);
-					}
-				}
-				else if (skillRoll >= 900 && skillRoll < 45)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.bAoe1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.bAoe1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-					OneVsOne.hero[k].sp -= 2;
-				}
-				else if (skillRoll >= 0 && skillRoll < 60)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.bTarget1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.bTarget1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-					OneVsOne.hero[k].sp -= 2;
-				}
-				else if (skillRoll >= 60)
-				{
-					OneVsOne.hero [k].sp -= 4;
-					attackValue = SkillList.bBack2sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.bBack2sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-					OneVsOne.hero[k].sp -= 4;
-				}
-			}
-		}
-
-		public static void staffSkillSelection(int k, int sp, bool unity, bool DS) {
-			Random rnd = new Random(Guid.NewGuid().GetHashCode());
-			int attackValue = 0;
-			int skillRoll = 0;
-			//int targetMethod = 0;
-
-			if (sp < 2)
-			{
-				attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-				Logic.combatExecution (k, attackValue);
-			}
-			else if (sp < 4)
-			{
-				// 1 sp skill AI
-				skillRoll = rnd.Next(0, 100);
-				if (skillRoll < 20)
-				{
-					attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					OneVsOne.hero [k].sp -= 2;
-				}
-				else if (skillRoll >= 20 && skillRoll < 60)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.stClosest1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-				}
-				else if (skillRoll >= 60)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.stClosest1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-				}
-			}
-			else if (sp < 6)
-			{
-				// 1 - 2 sp skill AI
-				skillRoll = rnd.Next(0, 100);
-				if (skillRoll < 15)
-				{
-					attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-					Logic.combatExecution(k, attackValue);
-				}
-				else if (skillRoll >= 15 && skillRoll < 55)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.stClosest1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-				}
-				else if (skillRoll >= 55 && skillRoll < 95)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.stClosest1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-				}
-				else if (skillRoll >= 95)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.stClosest1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-				}
-			}
-			else if (sp < 8)
-			{
-				// 1 - 2 sp skill AI
-				skillRoll = rnd.Next(0, 100);
-				if (skillRoll < 5)
-				{
-					attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-					Logic.combatExecution(k, attackValue);
-				}
-				else if (skillRoll >= 5 && skillRoll < 50)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.stClosest1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-				}
-				else if (skillRoll >= 50 && skillRoll < 70)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.stClosest1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-				}
-				else if (skillRoll >= 70)
-				{
-					OneVsOne.hero [k].sp -= 6;
-					attackValue = SkillList.stTarget3sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-				}
-			}
-			else if (sp == 8)
-			{
-				// 1 - 2 sp skill AI
-				skillRoll = rnd.Next(0, 100);
-				if (skillRoll < 0)
-				{
-					attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-					Logic.combatExecution(k, attackValue);
-				}
-				else if (skillRoll >= 0 && skillRoll < 45)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.stClosest1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-				}
-				else if (skillRoll >= 45 && skillRoll < 50)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.stTarget3sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-				}
-				else if (skillRoll >= 50)
-				{
-					OneVsOne.hero [k].sp -= 6;
-					attackValue = SkillList.stTarget3sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-				}
-			}
-		}
-
-		public static void axeSkillSelection(int k, int sp, bool unity, bool DS) {
-			Random rnd = new Random(Guid.NewGuid().GetHashCode());
-			int attackValue = 0;
-			int skillRoll = 0;
-			//int targetMethod = 0;
-
-			if (sp < 2)
-			{
-				attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-				Logic.combatExecution (k, attackValue);
-				if (DS) {
-					attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-					Logic.combatExecution (k, attackValue);
-				}
-			}
-			else if (sp < 4)
-			{
-				// 1 sp skill AI
-				skillRoll = rnd.Next(0, 100);
-				if (skillRoll < 20)
-				{
-					attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-				else if (skillRoll >= 200 && skillRoll < 60)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.aAoeDrain1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.aAoeDrain1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-				else if (skillRoll >= 20)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.aClosest_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.aClosest_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-			}
-			else if (sp < 6)
-			{
-				// 1 - 2 sp skill AI
-				skillRoll = rnd.Next(0, 100);
-				if (skillRoll < 15)
-				{
-					attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-					Logic.combatExecution(k, attackValue);
-					if (DS) {
-						attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-						Logic.combatExecution(k, attackValue);
-					}
-				}
-				else if (skillRoll >= 105 && skillRoll < 55)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.aAoeDrain1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.aAoeDrain1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-				else if (skillRoll >= 15 && skillRoll < 70)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.aClosest_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.aClosest_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-				else if (skillRoll >= 70)
-				{
-					OneVsOne.hero [k].sp -= 4;
-					attackValue = SkillList.aTarget2sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.aTarget2sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-			}
-			else if (sp < 8)
-			{
-				// 1 - 2 sp skill AI
-				skillRoll = rnd.Next(0, 100);
-				if (skillRoll < 5)
-				{
-					attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-					Logic.combatExecution(k, attackValue);
-					if (DS) {
-						attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-						Logic.combatExecution(k, attackValue);
-					}
-				}
-				else if (skillRoll >= 500 && skillRoll < 50)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.aAoeDrain1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.aAoeDrain1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-				else if (skillRoll >= 5 && skillRoll < 60)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.aClosest_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.aClosest_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-				else if (skillRoll >= 60)
-				{
-					OneVsOne.hero [k].sp -= 4;
-					attackValue = SkillList.aTarget2sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.aTarget2sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-			}
-			else if (sp == 8)
-			{
-				// 1 - 2 sp skill AI
-				skillRoll = rnd.Next(0, 100);
-				if (skillRoll < 0)
-				{
-					attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-					Logic.combatExecution(k, attackValue);
-					if (DS) {
-						attackValue = SkillList.normalAttack(OneVsOne.hero[k].power, OneVsOne.hero[k].critChance, OneVsOne.hero[k].critDamage);
-						Logic.combatExecution(k, attackValue);
-					}
-				}
-				else if (skillRoll >= 1110 && skillRoll < 45)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.aAoeDrain1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.aAoeDrain1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-				else if (skillRoll >= 0 && skillRoll < 50)
-				{
-					OneVsOne.hero [k].sp -= 2;
-					attackValue = SkillList.aClosest_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.aClosest_1sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-				else if (skillRoll >= 50)
-				{
-					OneVsOne.hero [k].sp -= 4;
-					attackValue = SkillList.aTarget2sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-					Logic.combatExecution (k, attackValue);
-					if (DS) {
-						attackValue = SkillList.aTarget2sp(OneVsOne.hero [k].power, OneVsOne.hero [k].critChance, OneVsOne.hero [k].critDamage);
-						Logic.combatExecution (k, attackValue);
-					}
-				}
-			}
-		}
-
-		public static void weaponSelection(int k, bool DS)
-        {
-			if ((int)OneVsOne.hero[k].weapon == 0) {
-				bowSkillSelection(k, OneVsOne.hero[k].sp, OneVsOne.hero[k].unity, DS);
-			} else if ((int)OneVsOne.hero[k].weapon == 1) {
-				spearSkillSelection(k, OneVsOne.hero[k].sp, OneVsOne.hero[k].unity, DS);
-			} else if ((int)OneVsOne.hero[k].weapon == 2) {
-				swordSkillSelection(k, OneVsOne.hero[k].sp, OneVsOne.hero[k].unity, DS);
-			} else if ((int)OneVsOne.hero[k].weapon == 3) {
-				staffSkillSelection(k, OneVsOne.hero[k].sp, OneVsOne.hero[k].unity, DS);
-			} else if ((int)OneVsOne.hero[k].weapon == 4) {
-				axeSkillSelection (k, OneVsOne.hero[k].sp, OneVsOne.hero[k].unity, DS);
-			}
         }
     }
+
+
+    public static void SwordSkillSelection(int k, int sp, bool unity, bool DS)
+    {
+
+        int attackValue = 0;
+        int skillRoll = 0;
+        int range = 0;
+        //int targetMethod = 0;
+
+        if (sp < 2)
+        {
+            Logic.HeroAttak0SP(k, DS);
+        }
+        else if (sp < 6)
+        {
+            // 1 sp skill AI
+            range = 15;
+            if (unity)
+            {
+                range += 10;
+            }
+            skillRoll = rnd.Next(0, range);
+            if (skillRoll < 10)
+            {
+                Logic.HeroAttak0SP(k, DS);
+            }
+            else if (skillRoll >= 10 && skillRoll < 15)
+            {
+                RaidSimulation.hero[k].sp -= 2;
+                attackValue = SkillList.SwTarget_1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                Logic.HeroDamageApplication(k, attackValue);
+                if (DS)
+                {
+                    attackValue = SkillList.SwTarget_1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                    Logic.HeroDamageApplication(k, attackValue);
+                }
+            }
+            else if (skillRoll >= 15)
+            {
+                RaidSimulation.hero[k].sp -= 2;
+                SpreadHealingSkill(k);
+                if (DS)
+                {
+                    SpreadHealingSkill(k);
+                }
+            }
+        }
+        else if (sp >= 6)
+        {
+            // 1 - 2 sp skill AI
+            range = 45;
+            if (unity)
+            {
+                range += 10;
+            }
+            skillRoll = rnd.Next(0, range);
+            if (skillRoll < 10)
+            {
+                Logic.HeroAttak0SP(k, DS);
+            }
+            else if (skillRoll >= 10 && skillRoll < 15)
+            {
+                RaidSimulation.hero[k].sp -= 2;
+                attackValue = SkillList.SwTarget_1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                Logic.HeroDamageApplication(k, attackValue);
+                if (DS)
+                {
+                    attackValue = SkillList.SwTarget_1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                    Logic.HeroDamageApplication(k, attackValue);
+                }
+            }
+            else if (skillRoll >= 15 && skillRoll < 45)
+            {
+                RaidSimulation.hero[k].sp -= 6;
+                RaidSimulation.hero[k].drain = true;
+                attackValue = SkillList.SwClosest3sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                Logic.HeroDamageApplication(k, attackValue);
+                if (DS)
+                {
+                    attackValue = SkillList.SwClosest3sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                    Logic.HeroDamageApplication(k, attackValue);
+                }
+                RaidSimulation.hero[k].drain = false;
+            }
+            else if (skillRoll >= 45)
+            {
+                RaidSimulation.hero[k].sp -= 2;
+                SpreadHealingSkill(k);
+                if (DS)
+                {
+                    SpreadHealingSkill(k);
+                }
+            }
+        }
+    }
+
+    public static void SpearSkillSelection(int k, int sp, bool unity, bool DS)
+    {
+
+        int attackValue = 0;
+        int skillRoll = 0;
+        int range = 0;
+        //int targetMethod = 0;
+
+        if (sp < 2)
+        {
+            Logic.HeroAttak0SP(k, DS);
+        }
+        else if (sp < 4)
+        {
+            // 1 sp skill AI
+            range = 25;
+            if (unity)
+            {
+                range += 10;
+            }
+            skillRoll = rnd.Next(0, range);
+            if (skillRoll < 10)
+            {
+                Logic.HeroAttak0SP(k, DS);
+            }
+            else if (skillRoll >= 10 && skillRoll < 25)
+            {
+                RaidSimulation.hero[k].sp -= 2;
+                attackValue = SkillList.SpBack1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                Logic.HeroDamageApplication(k, attackValue);
+                if (DS)
+                {
+                    attackValue = SkillList.SpBack1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                    Logic.HeroDamageApplication(k, attackValue);
+                }
+            }
+            else if (skillRoll >= 25)
+            {
+                RaidSimulation.hero[k].sp -= 2;
+                SpreadHealingSkill(k);
+                if (DS)
+                {
+                    SpreadHealingSkill(k);
+                }
+            }
+        }
+        else if (sp < 6)
+        {
+            // 1 - 2 sp skill AI
+            range = 55;
+            if (unity)
+            {
+                range += 10;
+            }
+            skillRoll = rnd.Next(0, range);
+            if (skillRoll < 10)
+            {
+                Logic.HeroAttak0SP(k, DS);
+            }
+            else if (skillRoll >= 10 && skillRoll < 25)
+            {
+                RaidSimulation.hero[k].sp -= 2;
+                attackValue = SkillList.SpBack1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                Logic.HeroDamageApplication(k, attackValue);
+                if (DS)
+                {
+                    attackValue = SkillList.SpBack1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                    Logic.HeroDamageApplication(k, attackValue);
+                }
+            }
+            else if (skillRoll >= 25 && skillRoll > 55)
+            {
+                RaidSimulation.hero[k].sp -= 4;
+                attackValue = SkillList.SpTarget2sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                Logic.HeroDamageApplication(k, attackValue);
+                if (DS)
+                {
+                    attackValue = SkillList.SpTarget2sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                    Logic.HeroDamageApplication(k, attackValue);
+                }
+            }
+            else if (skillRoll >= 55)
+            {
+                RaidSimulation.hero[k].sp -= 2;
+                SpreadHealingSkill(k);
+                if (DS)
+                {
+                    SpreadHealingSkill(k);
+                }
+            }
+        }
+        else if (sp >= 6)
+        {
+            // 1 - 2 sp skill AI
+            range = 85;
+            if (unity)
+            {
+                range += 10;
+            }
+            skillRoll = rnd.Next(0, range);
+            if (skillRoll < 10)
+            {
+                Logic.HeroAttak0SP(k, DS);
+            }
+            else if (skillRoll >= 10 && skillRoll < 25)
+            {
+                RaidSimulation.hero[k].sp -= 2;
+                attackValue = SkillList.SpBack1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                Logic.HeroDamageApplication(k, attackValue);
+                if (DS)
+                {
+                    attackValue = SkillList.SpBack1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                    Logic.HeroDamageApplication(k, attackValue);
+                }
+            }
+            else if (skillRoll >= 25 && skillRoll < 55)
+            {
+                RaidSimulation.hero[k].sp -= 4;
+                attackValue = SkillList.SpTarget2sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                Logic.HeroDamageApplication(k, attackValue);
+                if (DS)
+                {
+                    attackValue = SkillList.SpTarget2sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                    Logic.HeroDamageApplication(k, attackValue);
+                }
+            }
+            else if (skillRoll >= 55 && skillRoll < 85)
+            {
+                RaidSimulation.hero[k].sp -= 6;
+                attackValue = SkillList.SpClosest3sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                Logic.HeroDamageApplication(k, attackValue);
+                if (DS)
+                {
+                    attackValue = SkillList.SpClosest3sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                    Logic.HeroDamageApplication(k, attackValue);
+                }
+            }
+            else if (skillRoll >= 85)
+            {
+                RaidSimulation.hero[k].sp -= 2;
+                SpreadHealingSkill(k);
+                if (DS)
+                {
+                    SpreadHealingSkill(k);
+                }
+            }
+        }
+    }
+
+    public static void BowSkillSelection(int k, int sp, bool unity, bool DS)
+    {
+
+        int attackValue = 0;
+        int skillRoll = 0;
+        int range = 0;
+        //int targetMethod = 0;
+        if (sp < 2)
+        {
+            Logic.HeroAttak0SP(k, DS);
+        }
+        else if (sp < 4)
+        {
+            // 1 sp skill AI
+            range = 25;
+            if (unity)
+            {
+                range += 10;
+            }
+            skillRoll = rnd.Next(0, range);
+            if (skillRoll < 10)
+            {
+                Logic.HeroAttak0SP(k, DS);
+            }
+            else if (skillRoll >= 10 && skillRoll < 25)
+            {
+                RaidSimulation.hero[k].sp -= 2;
+                attackValue = SkillList.BTarget1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                Logic.HeroDamageApplication(k, attackValue);
+                if (DS)
+                {
+                    attackValue = SkillList.BTarget1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                    Logic.HeroDamageApplication(k, attackValue);
+                }
+            }
+            else if (skillRoll >= 25)
+            {
+                RaidSimulation.hero[k].sp -= 2;
+                SpreadHealingSkill(k);
+                if (DS)
+                {
+                    SpreadHealingSkill(k);
+                }
+            }
+
+        }
+        else if (sp >= 4)
+        {
+            // 1 - 2 sp skill AI
+            range = 55;
+            if (unity)
+            {
+                range += 10;
+            }
+            skillRoll = rnd.Next(0, range);
+            if (skillRoll < 10)
+            {
+                Logic.HeroAttak0SP(k, DS);
+            }
+            else if (skillRoll >= 10 && skillRoll < 25)
+            {
+                RaidSimulation.hero[k].sp -= 2;
+                attackValue = SkillList.BTarget1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                Logic.HeroDamageApplication(k, attackValue);
+                if (DS)
+                {
+                    attackValue = SkillList.BTarget1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                    Logic.HeroDamageApplication(k, attackValue);
+                }
+            }
+            else if (skillRoll >= 25 && skillRoll < 55)
+            {
+                RaidSimulation.hero[k].sp -= 4;
+                attackValue = SkillList.BBack2sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                Logic.HeroDamageApplication(k, attackValue);
+                if (DS)
+                {
+                    attackValue = SkillList.BBack2sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                    Logic.HeroDamageApplication(k, attackValue);
+                }
+            }
+            else if (skillRoll >= 55)
+            {
+                RaidSimulation.hero[k].sp -= 2;
+                SpreadHealingSkill(k);
+                if (DS)
+                {
+                    SpreadHealingSkill(k);
+                }
+            }
+        }
+    }
+
+    public static void StaffSkillSelection(int k, int sp, bool unity, bool DS)
+    {
+
+        int attackValue = 0;
+        int skillRoll = 0;
+        int range = 0;
+        //int targetMethod = 0;
+
+        if (sp < 2)
+        {
+            Logic.HeroAttak0SP(k, DS);
+        }
+        else if (sp < 6)
+        {
+            // 1 sp skill AI
+            range = 80;
+            if (unity)
+            {
+                range += 10;
+            }
+            skillRoll = rnd.Next(0, range);
+            if (skillRoll < 10)
+            {
+                Logic.HeroAttak0SP(k, DS);
+            }
+            else if (skillRoll >= 10 && skillRoll < 20)
+            {
+                RaidSimulation.hero[k].sp -= 2;
+                attackValue = SkillList.StClosest1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                Logic.HeroDamageApplication(k, attackValue);
+                if (DS)
+                {
+                    attackValue = SkillList.StClosest1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                    Logic.HeroDamageApplication(k, attackValue);
+                }
+
+            }
+            else if (skillRoll >= 20 && skillRoll < 80)
+            {
+                RaidSimulation.hero[k].sp -= 2;
+                SkillList.StHeal1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                if (DS)
+                {
+                    SkillList.StHeal1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                }
+            }
+            else if (skillRoll >= 80)
+            {
+                RaidSimulation.hero[k].sp -= 2;
+                SpreadHealingSkill(k);
+                if (DS)
+                {
+                    SpreadHealingSkill(k);
+                }
+            }
+        }
+        else if (sp >= 6)
+        {
+            // 1 - 2 sp skill AI
+            range = 90;
+            if (unity)
+            {
+                range += 10;
+            }
+            skillRoll = rnd.Next(0, range);
+            if (skillRoll < 10)
+            {
+                Logic.HeroAttak0SP(k, DS);
+            }
+            else if (skillRoll >= 10 && skillRoll < 20)
+            {
+                RaidSimulation.hero[k].sp -= 2;
+                attackValue = SkillList.StClosest1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                Logic.HeroDamageApplication(k, attackValue);
+                if (DS)
+                {
+                    attackValue = SkillList.StClosest1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                    Logic.HeroDamageApplication(k, attackValue);
+                }
+            }
+            else if (skillRoll >= 20 && skillRoll < 80)
+            {
+                RaidSimulation.hero[k].sp -= 2;
+                SkillList.StHeal1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                if (DS)
+                {
+                    SkillList.StHeal1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                }
+            }
+            else if (skillRoll >= 80 && skillRoll < 90)
+            {
+                RaidSimulation.hero[k].sp -= 6;
+                attackValue = SkillList.StTarget3sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                Logic.HeroDamageApplication(k, attackValue);
+                if (DS)
+                {
+                    attackValue = SkillList.StTarget3sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                    Logic.HeroDamageApplication(k, attackValue);
+                }
+            }
+            else if (skillRoll >= 90)
+            {
+                RaidSimulation.hero[k].sp -= 2;
+                SpreadHealingSkill(k);
+                if (DS)
+                {
+                    SpreadHealingSkill(k);
+                }
+            }
+        }
+    }
+
+    public static void AxeSkillSelection(int k, int sp, bool unity, bool DS)
+    {
+
+        int attackValue = 0;
+        int skillRoll = 0;
+        int range = 0;
+        //int targetMethod = 0;
+
+        if (sp < 2)
+        {
+            Logic.HeroAttak0SP(k, DS);
+        }
+        else if (sp < 4)
+        {
+            // 1 sp skill AI
+            range = 20;
+            if (unity)
+            {
+                range += 10;
+            }
+            skillRoll = rnd.Next(0, range);
+            if (skillRoll < 10)
+            {
+                Logic.HeroAttak0SP(k, DS);
+            }
+            else if (skillRoll >= 10 && skillRoll < 20)
+            {
+                RaidSimulation.hero[k].sp -= 2;
+                attackValue = SkillList.AClosest_1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                Logic.HeroDamageApplication(k, attackValue);
+                if (DS)
+                {
+                    attackValue = SkillList.AClosest_1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                    Logic.HeroDamageApplication(k, attackValue);
+                }
+            }
+            else if (skillRoll >= 20)
+            {
+                RaidSimulation.hero[k].sp -= 2;
+                SpreadHealingSkill(k);
+                if (DS)
+                {
+                    SpreadHealingSkill(k);
+                }
+            }
+        }
+        else if (sp >= 4)
+        {
+            // 1 - 2 sp skill AI
+            range = 80;
+            if (unity)
+            {
+                range += 10;
+            }
+            skillRoll = rnd.Next(0, range);
+            if (skillRoll < 10)
+            {
+                Logic.HeroAttak0SP(k, DS);
+            }
+            else if (skillRoll >= 10 && skillRoll < 20)
+            {
+                RaidSimulation.hero[k].sp -= 2;
+                attackValue = SkillList.AClosest_1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                Logic.HeroDamageApplication(k, attackValue);
+                if (DS)
+                {
+                    attackValue = SkillList.AClosest_1sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                    Logic.HeroDamageApplication(k, attackValue);
+                }
+            }
+            else if (skillRoll >= 20 && skillRoll < 80)
+            {
+                RaidSimulation.hero[k].sp -= 4;
+                attackValue = SkillList.ATarget2sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                Logic.HeroDamageApplication(k, attackValue);
+                if (DS)
+                {
+                    attackValue = SkillList.ATarget2sp(RaidSimulation.hero[k].power, RaidSimulation.hero[k].critChance, RaidSimulation.hero[k].critDamage, RaidSimulation.hero[k].empowerChance);
+                    Logic.HeroDamageApplication(k, attackValue);
+                }
+            }
+            else if (skillRoll >= 80)
+            {
+                RaidSimulation.hero[k].sp -= 2;
+                SpreadHealingSkill(k);
+                if (DS)
+                {
+                    SpreadHealingSkill(k);
+                }
+            }
+        }
+    }
+
+    public static void WeaponSelection(int k, bool DS)
+    {
+        int weapon = (int)RaidSimulation.hero[k].weapon;
+        switch (weapon)
+        {
+            case 1:
+                BowSkillSelection(k, RaidSimulation.hero[k].sp, RaidSimulation.hero[k].unity, DS);
+                break;
+            case 2:
+                SpearSkillSelection(k, RaidSimulation.hero[k].sp, RaidSimulation.hero[k].unity, DS);
+                break;
+            case 3:
+                SwordSkillSelection(k, RaidSimulation.hero[k].sp, RaidSimulation.hero[k].unity, DS);
+                break;
+            case 4:
+                StaffSkillSelection(k, RaidSimulation.hero[k].sp, RaidSimulation.hero[k].unity, DS);
+                break;
+            case 5:
+                AxeSkillSelection(k, RaidSimulation.hero[k].sp, RaidSimulation.hero[k].unity, DS);
+                break;
+            default:
+                break;
+        }
+    }
+
+
+    #region New Code
+    public static void WeaponSelection(Character hero, Character[] heroes, Character[] enemies)
+    {
+        int weapon = (int)hero.weapon;
+        switch (weapon)
+        {
+            case 1:
+                BowSkillSelection(hero, heroes, enemies);
+                break;
+            case 2:
+                SpearSkillSelection(hero, heroes, enemies);
+                break;
+            case 3:
+                SwordSkillSelection(hero, heroes, enemies);
+                break;
+            case 4:
+                StaffSkillSelection(hero, heroes, enemies);
+                break;
+            case 5:
+                AxeSkillSelection(hero, heroes, enemies);
+                break;
+            default:
+                break;
+        }
+    }
+
+    public static void SpreadHealingSkill(Character hero, Character[] heroes)
+    {
+        int i;
+        int target = 0;
+        int healingValue = 0;
+        int healingModifier = Convert.ToInt32(0.365 * hero.power);
+
+        healingValue = Convert.ToInt32(rnd.Next(healingModifier) + 0.73 * hero.power);
+
+        bool critRoll = Logic.RNGroll(hero.critChance);
+        if (critRoll)
+        {
+            healingValue = Convert.ToInt32(healingValue * hero.critDamage);
+        }
+
+        for (i = 0; i < healingValue; i++)
+        {
+            target = Logic.HealFindWeakestPerc(heroes);
+            heroes[target].hp++;
+            if (heroes[target].hp > heroes[target].maxHp)
+            {
+                heroes[target].hp = heroes[target].maxHp;
+            }
+        }
+    }
+
+    public static void SwordSkillSelection(Character hero, Character[] heroes, Character[] enemies)
+    {
+
+        int attackValue = 0;
+        int skillRoll = 0;
+        int range = 0;
+        if (hero.unity)
+        {
+            range = 10;
+        }
+        //int targetMethod = 0;
+        if (hero.sp < 2) range += 10;
+        else if (hero.sp < 4) range += 40;
+        else if (hero.sp < 6) range += 100;
+
+        skillRoll = rnd.Next(skillRoll);
+
+        if (skillRoll < 10)
+        {
+            Logic.HeroAttak0SP(hero, heroes, enemies);
+        }
+        else if (skillRoll >= 10 && skillRoll < 15)
+        {
+            hero.sp -= 2;
+            attackValue = SkillList.SwTarget_1sp(hero);
+            Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, Logic.SelectTarget(enemies));
+            if (Logic.RNGroll(hero.dsChance))
+            {
+                attackValue = SkillList.SwTarget_1sp(hero);
+                Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, Logic.SelectTarget(enemies));
+            }
+        }
+        else if (skillRoll >= 15 && skillRoll < 40)
+        {
+            bool isCrit = Logic.RNGroll(hero.critChance);
+            bool isEmp = Logic.RNGroll(hero.empowerChance);
+            hero.sp -= 2;
+            int target = Logic.SelectPierce(enemies);
+            for (int i = 0; i < 3; i++)
+            {
+                attackValue = SkillList.SwPierce3_1sp(hero);
+                if (isCrit)
+                {
+                    attackValue = Convert.ToInt32(attackValue * hero.critDamage);
+                }
+                if (isEmp) attackValue *= 2;
+                if (target < enemies.Length && enemies[target].hp > 0)
+                {
+                    Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, enemies[target]);
+                }
+                target++;
+            }
+            if (Logic.RNGroll(hero.dsChance))
+            {
+                isCrit = Logic.RNGroll(hero.critChance);
+                isEmp = Logic.RNGroll(hero.empowerChance);
+                target = Logic.SelectPierce(enemies);
+                for (int i = 0; i < 3; i++)
+                {
+                    attackValue = SkillList.SwPierce3_1sp(hero);
+                    if (isCrit)
+                    {
+                        attackValue = Convert.ToInt32(attackValue * hero.critDamage);
+                    }
+                    if (isEmp) attackValue *= 2;
+                    if (target < enemies.Length && enemies[target].hp > 0)
+                    {
+                        Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, enemies[target]);
+                    }
+                    target++;
+                }
+            }
+        }
+        else if (skillRoll >= 40 && skillRoll < 70)
+        {
+            bool isCrit = Logic.RNGroll(hero.critChance);
+            bool isEmp = Logic.RNGroll(hero.empowerChance);
+            hero.sp -= 4;
+            for (int i = 0; i < enemies.Length; i++)
+            {
+                attackValue = SkillList.SwAoe2sp(hero);
+                if (isCrit)
+                {
+                    attackValue = Convert.ToInt32(attackValue * hero.critDamage);
+                }
+                if (isEmp) attackValue *= 2;
+                if (enemies[i].hp > 0)
+                {
+                    Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, enemies[i]);
+                }
+            }
+            if (Logic.RNGroll(hero.dsChance))
+            {
+                isCrit = Logic.RNGroll(hero.critChance);
+                isEmp = Logic.RNGroll(hero.empowerChance);
+                for (int i = 0; i < enemies.Length; i++)
+                {
+                    attackValue = SkillList.SwAoe2sp(hero);
+                    if (isCrit)
+                    {
+                        attackValue = Convert.ToInt32(attackValue * hero.critDamage);
+                    }
+                    if (isEmp) attackValue *= 2;
+                    if (enemies[i].hp > 0)
+                    {
+                        Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, enemies[i]);
+                    }
+                }
+            }
+        }
+        else if (skillRoll >= 70 && skillRoll < 100)
+        {
+            hero.sp -= 6;
+            hero.drain = true;
+            attackValue = SkillList.SwClosest3sp(hero);
+            Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, Logic.SelectFront(enemies));
+            if (Logic.RNGroll(hero.dsChance))
+            {
+                attackValue = SkillList.SwClosest3sp(hero);
+                Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, Logic.SelectFront(enemies));
+            }
+            hero.drain = false;
+        }
+        else
+        {
+            hero.sp -= 2;
+            SpreadHealingSkill(hero, heroes);
+            if (Logic.RNGroll(hero.dsChance))
+            {
+                SpreadHealingSkill(hero, heroes);
+            }
+        }
+    }
+
+    public static void SpearSkillSelection(Character hero, Character[] heroes, Character[] enemies)
+    {
+
+        int attackValue = 0;
+        int skillRoll = 0;
+        int range = 0;
+        if (hero.unity)
+        {
+            range = 10;
+        }
+        if (hero.sp < 2) range += 10;
+        else if (hero.sp < 4) range += 40;
+        else if (hero.sp < 6) range += 70;
+        else range += 100;
+
+        skillRoll = rnd.Next(skillRoll);
+
+        if (skillRoll < 10)
+        {
+            Logic.HeroAttak0SP(hero, heroes, enemies);
+        }
+        else if (skillRoll >= 10 && skillRoll < 25)
+        {
+            hero.sp -= 2;
+            attackValue = SkillList.SpBack1sp(hero);
+            Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, Logic.SelectBack(enemies));
+            if (Logic.RNGroll(hero.dsChance))
+            {
+                attackValue = SkillList.SpBack1sp(hero);
+                Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, Logic.SelectBack(enemies));
+            }
+        }
+        else if (skillRoll >= 25 && skillRoll < 40)
+        {
+            bool isCrit = Logic.RNGroll(hero.critChance);
+            bool isEmp = Logic.RNGroll(hero.empowerChance);
+            hero.sp -= 2;
+            int target = Logic.SelectPierce(enemies);
+            for (int i = 0; i < 3; i++)
+            {
+                attackValue = SkillList.SpPierce3_1sp(hero);
+                if (isCrit)
+                {
+                    attackValue = Convert.ToInt32(attackValue * hero.critDamage);
+                }
+                if (isEmp) attackValue *= 2;
+                if (target < enemies.Length && enemies[target].hp > 0)
+                {
+                    Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, enemies[target]);
+                }
+                target++;
+            }
+            if (Logic.RNGroll(hero.dsChance))
+            {
+                isCrit = Logic.RNGroll(hero.critChance);
+                isEmp = Logic.RNGroll(hero.empowerChance);
+                target = Logic.SelectPierce(enemies);
+                for (int i = 0; i < 3; i++)
+                {
+                    attackValue = SkillList.SpPierce3_1sp(hero);
+                    if (isCrit)
+                    {
+                        attackValue = Convert.ToInt32(attackValue * hero.critDamage);
+                    }
+                    if (isEmp) attackValue *= 2;
+                    if (target < enemies.Length && enemies[target].hp > 0)
+                    {
+                        Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, enemies[target]);
+                    }
+                    target++;
+                }
+            }
+        }
+        else if (skillRoll >= 40 && skillRoll > 70)
+        {
+            hero.sp -= 4;
+            attackValue = SkillList.SpTarget2sp(hero);
+            Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, Logic.SelectTarget(enemies));
+            if (Logic.RNGroll(hero.dsChance))
+            {
+                attackValue = SkillList.SpTarget2sp(hero);
+                Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, Logic.SelectTarget(enemies));
+            }
+        }
+        else if (skillRoll >= 70 && skillRoll < 100)
+        {
+            hero.sp -= 6;
+            attackValue = SkillList.SpClosest3sp(hero);
+            Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, Logic.SelectFront(enemies));
+            if (Logic.RNGroll(hero.dsChance))
+            {
+                attackValue = SkillList.SpClosest3sp(hero);
+                Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, Logic.SelectFront(enemies));
+            }
+        }
+        else
+        {
+            hero.sp -= 2;
+            SpreadHealingSkill(hero, heroes);
+            if (Logic.RNGroll(hero.dsChance))
+            {
+                SpreadHealingSkill(hero, heroes);
+            }
+        }
+
+    }
+
+    public static void BowSkillSelection(Character hero, Character[] heroes, Character[] enemies)
+    {
+
+        int attackValue = 0;
+        int skillRoll = 0;
+        int range = 0;
+
+
+        if (hero.unity)
+        {
+            range = 10;
+        }
+        if (hero.sp < 2) range += 10;
+        else if (hero.sp < 4) range += 40;
+        else if (hero.sp < 6) range += 70;
+        else range += 100;
+
+        skillRoll = rnd.Next(skillRoll);
+
+        if (skillRoll < 10)
+        {
+            Logic.HeroAttak0SP(hero, heroes, enemies);
+        }
+        else if (skillRoll >= 10 && skillRoll < 25)
+        {
+            hero.sp -= 2;
+            attackValue = SkillList.BTarget1sp(hero);
+            Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, Logic.SelectTarget(enemies));
+            if (Logic.RNGroll(hero.dsChance))
+            {
+                attackValue = SkillList.BTarget1sp(hero);
+                Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, Logic.SelectTarget(enemies));
+            }
+        }
+        else if (skillRoll >= 25 && skillRoll < 40)
+        {
+            bool isCrit = Logic.RNGroll(hero.critChance);
+            bool isEmp = Logic.RNGroll(hero.empowerChance);
+            hero.sp -= 2;
+            for (int i = 0; i < enemies.Length; i++)
+            {
+                attackValue = SkillList.BAoe1sp(hero);
+                if (isCrit)
+                {
+                    attackValue = Convert.ToInt32(attackValue * hero.critDamage);
+                }
+                if (isEmp) attackValue *= 2;
+
+                if (enemies[i].hp > 0)
+                {
+                    Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, enemies[i]);
+                }
+            }
+            if (Logic.RNGroll(hero.dsChance))
+            {
+                isCrit = Logic.RNGroll(hero.critChance);
+                isEmp = Logic.RNGroll(hero.empowerChance);
+                for (int i = 0; i < 3; i++)
+                {
+                    attackValue = SkillList.SpPierce3_1sp(hero);
+                    if (isCrit)
+                    {
+                        attackValue = Convert.ToInt32(attackValue * hero.critDamage);
+                    }
+                    if (isEmp) attackValue *= 2;
+                    if (enemies[i].hp > 0)
+                    {
+                        Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, enemies[i]);
+                    }
+                }
+            }
+        }
+        else if (skillRoll >= 40 && skillRoll < 70)
+        {
+            hero.sp -= 4;
+            attackValue = SkillList.BBack2sp(hero);
+            Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, Logic.SelectBack(enemies));
+            if (Logic.RNGroll(hero.dsChance))
+            {
+                attackValue = SkillList.BBack2sp(hero);
+                Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, Logic.SelectBack(enemies));
+            }
+        }
+        else if (skillRoll >= 70 && skillRoll < 100)
+        {
+            bool isCrit = Logic.RNGroll(hero.critChance);
+            bool isEmp = Logic.RNGroll(hero.empowerChance);
+            hero.sp -= 6;
+            hero.drain = true;
+            for (int i = 0; i < enemies.Length; i++)
+            {
+                attackValue = SkillList.BAoeDraint3sp(hero);
+                if (isCrit)
+                {
+                    attackValue = Convert.ToInt32(attackValue * hero.critDamage);
+                }
+                if (isEmp) attackValue *= 2;
+
+                if (enemies[i].hp > 0)
+                {
+                    Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, enemies[i]);
+                }
+
+            }
+            if (Logic.RNGroll(hero.dsChance))
+            {
+                isCrit = Logic.RNGroll(hero.critChance);
+                isEmp = Logic.RNGroll(hero.empowerChance);
+                for (int i = 0; i < enemies.Length; i++)
+                {
+                    attackValue = SkillList.BAoeDraint3sp(hero);
+                    if (isCrit)
+                    {
+                        attackValue = Convert.ToInt32(attackValue * hero.critDamage);
+                    }
+                    if (isEmp) attackValue *= 2;
+                    if (enemies[i].hp > 0)
+                    {
+                        Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, enemies[i]);
+                    }
+                }
+            }
+            hero.drain = false;
+        }
+        else
+        {
+            hero.sp -= 2;
+            SpreadHealingSkill(hero, heroes);
+            if (Logic.RNGroll(hero.dsChance))
+            {
+                SpreadHealingSkill(hero, heroes);
+            }
+        }
+    }
+
+    public static void StaffSkillSelection(Character hero, Character[] heroes, Character[] enemies)
+    {
+
+        int attackValue = 0;
+        int skillRoll = 0;
+        int range = 0;
+
+        if (hero.unity)
+        {
+            range = 10;
+        }
+        if (hero.sp < 2) range += 10;
+        else if (hero.sp < 4) range += 80;
+        else if (hero.sp < 6) range += 90;
+        else range += 100;
+
+        skillRoll = rnd.Next(skillRoll);
+
+        if (skillRoll < 10)
+        {
+            Logic.HeroAttak0SP(hero, heroes, enemies);
+        }
+        else if (skillRoll >= 10 && skillRoll < 15)
+        {
+            hero.sp -= 2;
+            attackValue = SkillList.StClosest1sp(hero);
+            Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, Logic.SelectBack(enemies));
+            if (Logic.RNGroll(hero.dsChance))
+            {
+                attackValue = SkillList.StClosest1sp(hero);
+                Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, Logic.SelectBack(enemies));
+            }
+        }
+        else if (skillRoll >= 15 && skillRoll < 80)
+        {
+            hero.sp -= 2;
+            attackValue = SkillList.StHeal1sp(hero);
+            int target = Logic.HealFindWeakestPerc(heroes);
+            heroes[target].hp += attackValue;
+            if (heroes[target].hp > heroes[target].maxHp) heroes[target].hp = heroes[target].maxHp;
+
+            if (Logic.RNGroll(hero.dsChance))
+            {
+                attackValue = SkillList.StHeal1sp(hero);
+                target = Logic.HealFindWeakestPerc(heroes);
+                heroes[target].hp += attackValue;
+                if (heroes[target].hp > heroes[target].maxHp) heroes[target].hp = heroes[target].maxHp;
+            }
+        }
+        else if (skillRoll >= 80 && skillRoll < 90)
+        {
+            bool isCrit = Logic.RNGroll(hero.critChance);
+            bool isEmp = Logic.RNGroll(hero.empowerChance);
+            hero.sp -= 4;
+            for (int i = 0; i < enemies.Length; i++)
+            {
+                attackValue = SkillList.StAOE2sp(hero);
+                if (isCrit)
+                {
+                    attackValue = Convert.ToInt32(attackValue * hero.critDamage);
+                }
+                if (isEmp) attackValue *= 2;
+
+                if (enemies[i].hp > 0)
+                {
+                    Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, enemies[i]);
+                }
+            }
+            if (Logic.RNGroll(hero.dsChance))
+            {
+                isCrit = Logic.RNGroll(hero.critChance);
+                isEmp = Logic.RNGroll(hero.empowerChance);
+                for (int i = 0; i < 3; i++)
+                {
+                    attackValue = SkillList.StAOE2sp(hero);
+                    if (isCrit)
+                    {
+                        attackValue = Convert.ToInt32(attackValue * hero.critDamage);
+                    }
+                    if (isEmp) attackValue *= 2;
+                    if (enemies[i].hp > 0)
+                    {
+                        Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, enemies[i]);
+                    }
+                }
+            }
+        }
+        else if (skillRoll >= 90 && skillRoll < 100)
+        {
+            hero.sp -= 6;
+            attackValue = SkillList.StTarget3sp(hero);
+            Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, Logic.SelectTarget(enemies));
+            if (Logic.RNGroll(hero.dsChance))
+            {
+                attackValue = SkillList.StTarget3sp(hero);
+                Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, Logic.SelectTarget(enemies));
+            }
+        }
+        else
+        {
+            hero.sp -= 2;
+            SpreadHealingSkill(hero, heroes);
+            if (Logic.RNGroll(hero.dsChance))
+            {
+                SpreadHealingSkill(hero, heroes);
+            }
+        }
+    }
+
+    public static void AxeSkillSelection(Character hero, Character[] heroes, Character[] enemies)
+    {
+
+        int attackValue = 0;
+        int skillRoll = 0;
+        int range = 0;
+
+        if (hero.unity)
+        {
+            range = 10;
+        }
+        if (hero.sp < 2) range += 10;
+        else if (hero.sp < 4) range += 40;
+        else if (hero.sp < 6) range += 100;
+        else range += 150;
+
+        skillRoll = rnd.Next(skillRoll);
+
+        if (skillRoll < 10)
+        {
+            Logic.HeroAttak0SP(hero, heroes, enemies);
+        }
+        else if (skillRoll >= 10 && skillRoll < 30)
+        {
+            bool isCrit = Logic.RNGroll(hero.critChance);
+            bool isEmp = Logic.RNGroll(hero.empowerChance);
+            hero.sp -= 2;
+            hero.drain = true;
+            for (int i = 0; i < enemies.Length; i++)
+            {
+                attackValue = SkillList.AAoeDrain1sp(hero);
+                if (isCrit)
+                {
+                    attackValue = Convert.ToInt32(attackValue * hero.critDamage);
+                }
+                if (isEmp) attackValue *= 2;
+
+                if (enemies[i].hp > 0)
+                {
+                    Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, enemies[i]);
+                }
+
+            }
+            if (Logic.RNGroll(hero.dsChance))
+            {
+                isCrit = Logic.RNGroll(hero.critChance);
+                isEmp = Logic.RNGroll(hero.empowerChance);
+                for (int i = 0; i < enemies.Length; i++)
+                {
+                    attackValue = SkillList.AAoeDrain1sp(hero);
+                    if (isCrit)
+                    {
+                        attackValue = Convert.ToInt32(attackValue * hero.critDamage);
+                    }
+                    if (isEmp) attackValue *= 2;
+                    if (enemies[i].hp > 0)
+                    {
+                        Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, enemies[i]);
+                    }
+                }
+            }
+            hero.drain = false;
+        }
+        else if (skillRoll >= 30 && skillRoll < 40)
+        {
+            hero.sp -= 2;
+
+            attackValue = SkillList.AClosest_1sp(hero);
+            Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, Logic.SelectFront(enemies));
+            if (Logic.RNGroll(hero.dsChance))
+            {
+                attackValue = SkillList.AClosest_1sp(hero);
+                Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, Logic.SelectFront(enemies));
+            }
+        }
+        else if (skillRoll >= 40 && skillRoll < 100)
+        {
+            hero.sp -= 4;
+            attackValue = SkillList.ATarget2sp(hero);
+            Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, Logic.SelectTarget(enemies));
+            if (Logic.RNGroll(hero.dsChance))
+            {
+                attackValue = SkillList.ATarget2sp(hero);
+                Logic.HeroDamageApplication(hero, heroes, enemies, attackValue, Logic.SelectTarget(enemies));
+            }
+        }
+        else if (skillRoll >= 100 && skillRoll < 150)
+        {
+            hero.sp -= 6;
+            attackValue = SkillList.ASpreadHeal3sp(hero);
+            for (int i = 0; i < attackValue; i++)
+            {
+                int target = Logic.HealFindWeakestPerc(heroes);
+                heroes[target].hp++;
+                if (heroes[target].hp > heroes[target].maxHp)
+                {
+                    heroes[target].hp = heroes[target].maxHp;
+                }
+            }
+        }
+        else
+        {
+            hero.sp -= 2;
+            SpreadHealingSkill(hero, heroes);
+            if (Logic.RNGroll(hero.dsChance))
+            {
+                SpreadHealingSkill(hero, heroes);
+            }
+        }
+    }
+
+    #endregion
+
+
 }
 
-
-
- /*deflectRoll = Logic.RNGroll (OneVsOne.hero [target].deflectChance);
-				while (deflectRoll) {
-					if (target != k) {
-						target = k;
-					} else {
-						target = initialTarget;
-					}
-					deflectRoll = Logic.RNGroll (OneVsOne.hero [target].deflectChance);
-				}
-				//
-
-				 //following IFs statements to take account of defensive stats of OneVsOne.hero
-				if (!deflectRoll)
-				{
-					evadeRoll = Logic.RNGroll(OneVsOne.hero[target].evadeChance);
-					if (!evadeRoll)
-					{
-						blockRoll = Logic.RNGroll(OneVsOne.hero[target].blockChance);
-						if (blockRoll)
-						{
-							//Console.WriteLine("\n block successful!\n");
-							OneVsOne.hero[target].hp -= Convert.ToInt32(0.5 * attackValue);
-							if (OneVsOne.hero[target].hp <= 0)
-							{
-								OneVsOne.hero[target].alive = false;
-							}
-							else
-							{
-								PetLogic.petSelection1v1(target);
-							}
-						}
-						else
-						{
-							OneVsOne.hero[target].hp -= attackValue;
-							if (OneVsOne.hero[target].hp <= 0)
-							{
-								OneVsOne.hero[target].alive = false;
-							}
-							else
-							{
-								PetLogic.petSelection1v1(target);
-							}
-						}
-					}
-					else
-					{ //Console.WriteLine("\n evade successful!\n"); 
-					}
-				}*/
+*/

@@ -25,3 +25,5 @@ C:\Users\Cesar Jaimes\Documents\GitHub\BHtest\BH_cs\BHtest\obj\Debug\netcoreapp1
 C:\Users\Cesar Jaimes\Documents\GitHub\BHtest\BH_cs\BHtest\obj\Debug\netcoreapp1.1\BHtest.AssemblyInfo.cs
 C:\Users\Cesar Jaimes\Documents\GitHub\BHtest\BH_cs\BHtest\obj\Debug\netcoreapp1.1\BHtest.dll
 C:\Users\Cesar Jaimes\Documents\GitHub\BHtest\BH_cs\BHtest\obj\Debug\netcoreapp1.1\BHtest.pdb
+C:\Users\Cesar Jaimes\Documents\GitHub\BHtest\BH_cs\BHtest\obj\Debug\netcoreapp1.1\BHtest.csproj.CoreCompileInputs.cache
+C:\Users\Cesar Jaimes\Documents\GitHub\BHtest\BH_cs\BHtest\obj\Debug\netcoreapp1.1\BHtest.AssemblyInfoInputs.cache
