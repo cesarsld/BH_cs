@@ -9,6 +9,7 @@ public enum PetAbilty
     SpreahHeal,
     SelfHeal,
     WeakestHeal,
+    SpreadShield,
     TeamShield,
     TeamHealShield,
     AOEAttack,
@@ -26,7 +27,7 @@ public enum PetProcType
 
 public class Pet
 {
-    public static Random random = new Random(Guid.NewGuid().GetHashCode());
+    //public static Random random = new Random(Guid.NewGuid().GetHashCode());
     private float ProcChance;
     private float Scaling;
     private float Range;
@@ -60,8 +61,8 @@ public class Pet
     {
         int attackModifier = Convert.ToInt32(Scaling * Range * author.power);
         int returnValue = 0;
-        int mod = Convert.ToInt32(Math.Pow(-1, random.Next(2)));
-        returnValue = Convert.ToInt32(author.power * Scaling + random.Next(attackModifier) * mod);
+        int mod = Convert.ToInt32(Math.Pow(-1, ThreadSafeRandom.Next(2)));
+        returnValue = Convert.ToInt32(author.power * Scaling + ThreadSafeRandom.Next(attackModifier) * mod);
 
         if (IsCrit)
         {
@@ -95,6 +96,9 @@ public class Pet
                         break;
                     case PetAbilty.WeakestHeal:
                         WeakestHeal(party);
+                        break;
+                    case PetAbilty.SpreadShield:
+                        SpreadShield(party);
                         break;
                     case PetAbilty.TeamHealShield:
                         TeamHealShield(party);
@@ -187,6 +191,19 @@ public class Pet
             }
         }
     }
+    private void SpreadShield(Character[] party)
+    {
+        Character target;
+        for (int i = 0; i < 10; i++)
+        {
+            target = Logic.ShieldFindWeakestPerc(party);
+            target.shield += Value / 10;
+            if (target.shield > target.maxShield)
+            {
+                target.shield = target.maxShield;
+            }
+        }
+    }
     private void WeakestHeal(Character[] party)
     {
         Character target = Logic.HealFindWeakestPerc(party);
@@ -230,7 +247,7 @@ public class Pet
     {
         while (true)
         {
-            int target = random.Next(enemies.Length);
+            int target = ThreadSafeRandom.Next(enemies.Length);
             if (WorldBossSimulation.GetPartyCount(enemies) > 0 && enemies[target].hp > 0)
             {
                 enemies[target].hp -= Value;

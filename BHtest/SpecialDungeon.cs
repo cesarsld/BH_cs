@@ -17,7 +17,6 @@ public class SpecialDungeon
     public int Games = 1000;
     Random rand;
     private bool isNotHero = false;
-    private bool isHero = true;
 
     private bool heroesAlive
     {
@@ -49,7 +48,7 @@ public class SpecialDungeon
         DifficultyModifier = difficultyModifier;
     }
 
-    public void Simulation(int boss)
+    public void Simulation()
     {
         //slider = UnityEngine.GameObject.Find("Progress").GetComponent<Slider>();
         int p;
@@ -69,7 +68,7 @@ public class SpecialDungeon
         for (p = 0; p < games; p++)
         {
             float trCounter = 0;
-            SetupEnemies(boss);
+            SetupEnemies();
             Character[] charArray = new Character[heroes.Length + enemies.Length];
             int charIndex = 0;
             foreach (Character hero in heroes)
@@ -92,23 +91,24 @@ public class SpecialDungeon
                 {
                     if (character.alive)
                     {
-                        character.IncrementCounter();
+                        character.IncCounter();
                         if (character.counter > trCounter)
                         {
-                            character.IncrementSp();
                             if (character._isHero)
                             {
+                                character.IncSp(heroes);
                                 if (character.pet != null) character.pet.PetSelection(character, heroes, enemies, PetProcType.PerTurn);
                                 if (matchOver) break;
                                 character.ChooseSkill(heroes, enemies);
                             }
                             else
                             {
+                                character.IncSp(enemies);
                                 if (character.pet != null) character.pet.PetSelection(character, enemies, heroes, PetProcType.PerTurn);
                                 if (matchOver) break;
                                 character.ChooseSkill(enemies, heroes);
                             }
-                            character.SubstractCounter(trCounter);
+                            character.SubCount(trCounter);
                         }
                     }
                 }
@@ -133,18 +133,17 @@ public class SpecialDungeon
         Console.WriteLine("winrate is = " + winRate.ToString() + "%");
     }
 
-    private void SetupEnemies(int boss)
+    private void SetupEnemies()
     {
         //int bossType = rand.Next(3);
         Character bossPlaceholder;
-        if (boss == 0)
-        {
-            Character placeHolder1 = GetZoneTrash(rand.Next(6));
-            Character placeHolder2 = GetZoneTrash(rand.Next(6));
-            bossPlaceholder = GetZoneBoss(rand.Next(2));
-            List<Character> enemyList = new List<Character>() { placeHolder1, placeHolder2, bossPlaceholder };
-            enemies = enemyList.OrderByDescending(mob => mob.priority).ToArray();
-        }
+
+        Character placeHolder1 = GetZoneTrash(rand.Next(6));
+        Character placeHolder2 = GetZoneTrash(rand.Next(6));
+        bossPlaceholder = GetZoneBoss(rand.Next(2));
+        List<Character> enemyList = new List<Character>() { placeHolder1, placeHolder2, bossPlaceholder };
+        enemies = enemyList.OrderByDescending(mob => mob.priority).ToArray();
+
 
         foreach (Character mob in enemies)
         {

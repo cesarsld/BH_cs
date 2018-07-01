@@ -25,7 +25,9 @@ public enum SkillType
     Ricochet4,
     Ricochet2,
     Unity,
-    Revive
+    Revive,
+    OnTurnShield,
+    WeakestTayto
 
 }
 public enum Boolean
@@ -56,6 +58,21 @@ public class Skill
             }
         }
     }
+
+    public Boolean IsShielding
+    {
+        get
+        {
+            switch (skillType)
+            {
+                case SkillType.SelfSHield:
+                    return Boolean.True;
+                default:
+                    return Boolean.Null;
+            }
+        }
+    }
+
     public Boolean IsAOE
     {
         get
@@ -94,7 +111,7 @@ public class Skill
     }
     private bool IsCrit;
     private bool IsEmp;
-    public static Random random = new Random(Guid.NewGuid().GetHashCode());
+    //public static Random random = new Random(Guid.NewGuid().GetHashCode());
     private SkillType skillType;
 
 
@@ -113,16 +130,17 @@ public class Skill
         IsEmp = Logic.RNGroll(character.empowerChance);
     }
 
-    public int GetValue(Character character)
+    public int GetValue(Character author)
     {
-        int attackModifier = Convert.ToInt32(Value * Range * character.power);
+        int attackModifier = Convert.ToInt32(Value * Range * author.power);
         int returnValue = 0;
-        int mod = Convert.ToInt32(Math.Pow(-1, random.Next(2)));
-        returnValue = Convert.ToInt32(character.power * Value + random.Next(attackModifier) * mod);
+        int mod = Convert.ToInt32(Math.Pow(-1, ThreadSafeRandom.Next(2)));
+        returnValue = Convert.ToInt32((author.power + author.enrageBar) * Value + ThreadSafeRandom.Next(attackModifier) * mod);
+        author.enrageBar = 0;
 
         if (IsCrit)
         {
-            returnValue = Convert.ToInt32(returnValue * character.critDamage);
+            returnValue = Convert.ToInt32(returnValue * author.critDamage);
         }
         if (IsEmp)
         {
@@ -169,6 +187,9 @@ public class Skill
                 case SkillType.SelfHeal:
                     SelfHealSkill(author);
                     break;
+                case SkillType.SelfSHield:
+                    SelfShieldSkill(author);
+                    break;
                 case SkillType.SpreadHeal:
                     SpreadHealSkill(author, party);
                     break;
@@ -207,6 +228,15 @@ public class Skill
                     break;
                 case SkillType.Revive:
                     break;
+                case SkillType.OnTurnShield:
+                    OnTurnShieldTeam(author, party);
+                    amountToCast = 1;
+                    break;
+                case SkillType.WeakestTayto:
+                    WeakestTaytoSkill(author, party, opponents);
+                    amountToCast = 1;
+                    break;
+
             }
             amountToCast--;
         }
@@ -237,6 +267,7 @@ public class Skill
         else
         {
             Logic.DamageApplication(attackValue, target, author, party, receivingParty);
+            if (Logic.RNGroll(author.ricochetChance) && WorldBossSimulation.GetPartyCount(opponents) > 0) DamageLogic(author, party, opponents, Logic.SelectRicochet(opponents, target), absorbProc); //this implmentation won't work as well if enemies have redirect/deflect
         }
     }
 
@@ -272,24 +303,30 @@ public class Skill
         Character target = Logic.RedirectDeflectLoop(Logic.SelectWeakest(opponents), author, opponents, party, ref absorbProc);
         DamageLogic(author, party, opponents, target, absorbProc);
     }
+    private void WeakestTaytoSkill(Character author, Character[] party, Character[] opponents)
+    {
+        //find target 
+        bool absorbProc = false;
+        Character target = Logic.SelectWeakest(opponents);
+        DamageLogic(author, party, opponents, target, absorbProc);
+    }
     private void TargetHealSkill(Character author, Character[] party)
     {
         Character target = Logic.HealFindWeakestPerc(party);
         int attackValue = GetValue(author);
-        if (author.lunarBonus)
-        {
-            attackValue = Convert.ToInt32(attackValue * 1.15f);
-        }
-        if (target.decayBonus)
+        attackValue = Convert.ToInt32(attackValue * author.bonusHealing);
+
+        if (target.FindMythBonus(MythicBonus.Decay))
         {
             if (Logic.RNGroll(5f)) attackValue *= 2;
         }
-        if ((int)author.maruBonus >= (int)Character.MARUBonus.Bonus_2_of_4)
+
+        if (author.percToShield > 0f)
         {
-            target.shield = Convert.ToInt32(attackValue * 0.1);
+            target.shield += Convert.ToInt32(attackValue * author.percToShield);
             if (target.shield > target.maxShield) target.shield = target.maxShield;
         }
-        if ((int)author.maruBonus >= (int)Character.MARUBonus.Bonus_3_of_4)
+        if (author.overHeal)
         {
             if (target.maxHp - target.hp < attackValue)
             {
@@ -308,22 +345,19 @@ public class Skill
         for (int i = 0; i < party.Length; i++)
         {
             int attackValue = GetValue(author);
-            if (author.lunarBonus)
-            {
-                attackValue = Convert.ToInt32(attackValue * 1.15f);
-            }
+            attackValue = Convert.ToInt32(attackValue * author.bonusHealing);
             if (party[i].alive)
             {
-                if (party[i].decayBonus)
+                if (party[i].FindMythBonus(MythicBonus.Decay))
                 {
                     if (Logic.RNGroll(5f)) attackValue *= 2;
                 }
-                if ((int)author.maruBonus >= (int)Character.MARUBonus.Bonus_2_of_4)
+                if (author.percToShield > 0f)
                 {
-                    party[i].shield = Convert.ToInt32(attackValue * 0.1);
+                    party[i].shield += Convert.ToInt32(attackValue * author.percToShield);
                     if (party[i].shield > party[i].maxShield) party[i].shield = party[i].maxShield;
                 }
-                if ((int)author.maruBonus >= (int)Character.MARUBonus.Bonus_3_of_4)
+                if (author.overHeal)
                 {
                     if (party[i].maxHp - party[i].hp < attackValue)
                     {
@@ -343,17 +377,32 @@ public class Skill
     {
         Character target = Logic.HealFindWeakestPerc(party);
         int healingValue = GetValue(author);
-        if (author.lunarBonus)
-        {
-            healingValue = Convert.ToInt32(healingValue * 1.15f);
-        }
+        healingValue = Convert.ToInt32(healingValue * author.bonusHealing);
+
         for (int i = 0; i < 10; i++)
         {
             target = Logic.HealFindWeakestPerc(party);
             target.hp += healingValue / 10;
-            if (target.decayBonus)
+            if (target.FindMythBonus(MythicBonus.Decay))
             {
                 if (Logic.RNGroll(5f)) target.hp += healingValue / 10;
+            }
+            if (author.percToShield > 0f)
+            {
+                target.shield += Convert.ToInt32(healingValue * author.percToShield / 10);
+                if (target.shield > target.maxShield) target.shield = target.maxShield;
+            }
+            if (author.overHeal)
+            {
+                int attackValue = healingValue / 10;
+                if (target.maxHp - target.hp < attackValue)
+                {
+                    attackValue -= (target.maxHp - target.hp);
+                    target.hp = target.maxHp;
+                    target.shield += attackValue;
+                    if (target.shield > target.maxShield) target.shield = target.maxShield;
+                    attackValue = 0;
+                }
             }
             if (target.hp > target.maxHp)
             {
@@ -364,20 +413,17 @@ public class Skill
     private void SelfHealSkill(Character author)
     {
         int attackValue = GetValue(author);
-        if (author.decayBonus)
+        if (author.FindMythBonus(MythicBonus.Decay))
         {
             if (Logic.RNGroll(5f)) attackValue *= 2;
         }
-        if (author.lunarBonus)
-        {
-            attackValue = Convert.ToInt32(attackValue * 1.15f);
-        }
-        if ((int)author.maruBonus >= (int)Character.MARUBonus.Bonus_2_of_4)
+        attackValue = Convert.ToInt32(attackValue * author.bonusHealing);
+        if (author.percToShield > 0f)
         {
             author.shield = Convert.ToInt32(attackValue * 0.1);
             if (author.shield > author.maxShield) author.shield = author.maxShield;
         }
-        if ((int)author.maruBonus >= (int)Character.MARUBonus.Bonus_3_of_4)
+        if (author.overHeal)
         {
             if (author.maxHp - author.hp < attackValue)
             {
@@ -390,6 +436,12 @@ public class Skill
         }
         author.hp += attackValue;
         if (author.hp > author.maxHp) author.hp = author.maxHp;
+    }
+    private void SelfShieldSkill(Character author)
+    {
+        int attackValue = GetValue(author);
+        author.shield += attackValue;
+        if (author.shield > author.maxShield) author.shield = author.maxShield;
     }
     private void AoeSkill(Character author, Character[] party, Character[] opponents)
     {
@@ -449,6 +501,17 @@ public class Skill
             else { break; }
         }
     }
-
+    private void OnTurnShieldTeam(Character author, Character[] party)
+    {
+        int attackValue = GetValue(author);
+        foreach (var member in party)
+        {
+            if (member.alive)
+            {
+                member.shield += attackValue;
+                if (member.shield > member.maxHp) member.shield = member.maxShield;
+            }
+        }
+    }
 
 }

@@ -5,13 +5,15 @@ using System.Linq;
 
 class Logic
 {
-    public static Random random = new Random(Guid.NewGuid().GetHashCode());
+    //public static Random random = new Random(Guid.NewGuid().GetHashCode());
     //methods for game logic
+    private static RngLogger<float> logger = new RngLogger<float>();
     public static bool RNGroll(float a)
     {
         bool outcome;
         float chance = a * 10f;
-        float roll = random.Next(1000);
+        float roll = ThreadSafeRandom.Next(1000);
+        //logger.WriteLine((int)roll);
         if (roll < chance)
         {
             outcome = true;
@@ -25,6 +27,7 @@ class Logic
 
     public static float TurnRate(int power, int agility)
     {
+        if (power == 0) power = 1;
         float tr = 0f;
         tr = ((agility + power) / 2f);
         tr = (float)Math.Pow(tr, 2);
@@ -49,51 +52,60 @@ class Logic
             target.shield = target.maxShield;
         }
     }
+
+    public static Boolean IsShieldingNeeded(Character author)
+    {
+
+        if (author.alive && author.shield < author.maxShield * 0.75f) return Boolean.True;
+
+        return Boolean.False;
+    }
+
     public static void Hit(int attackValue, Character target, Character author, bool isBlocked, Character[] opponents, Character[] party)
     {
-        float attackModifier = 1f;
-        float reductionModifier = 0f;
-
+        float attackModifier = 1f + author.ReturnPersonalAttackMods(target, opponents, party);
+        float reductionModifier = 0f + target.ReturnPersonalDefenceMods(opponents);
+        int attackValuePrint = attackValue;
         //oblit check
-        int position = Array.IndexOf(opponents, target);
-        if (position != 0)
-        {
-            for (int i = position; i >= 0; i--)
-            {
-                if (opponents[i].alive
-                    && (int)opponents[i].obliterationBonus >= (int)Character.ObliterationBonus.Bonus_2_of_4) reductionModifier += 0.05f;
-            }
-        }
-        position = Array.IndexOf(party, author);
-        if (position != 0)
-        {
-            for (int i = position; i >= 0; i--)
-            {
-                if (party[i].alive
-                    && (int)party[i].obliterationBonus >= (int)Character.ObliterationBonus.Bonus_3_of_4)
-                    attackModifier += 0.05f;
-            }
-        }
-        if (target.obliterationBonus == Character.ObliterationBonus.Bonus_4_of_4 
-            && WorldBossSimulation.GetPartyCount(opponents) == opponents.Length) reductionModifier += 0.15f;
+        //int position = Array.IndexOf(opponents, target);
+        //if (position != 0)
+        //{
+        //    for (int i = position; i >= 0; i--)
+        //    {
+        //        if (opponents[i].alive
+        //            && (int)opponents[i].obliterationBonus >= (int)Character.ObliterationBonus.Bonus_2_of_4) reductionModifier += 0.05f;
+        //    }
+        //}
+        //position = Array.IndexOf(party, author);
+        //if (position != 0)
+        //{
+        //    for (int i = position; i >= 0; i--)
+        //    {
+        //        if (party[i].alive
+        //            && (int)party[i].obliterationBonus >= (int)Character.ObliterationBonus.Bonus_3_of_4)
+        //            attackModifier += 0.05f;
+        //    }
+        //}
+        //if (target.obliterationBonus == Character.ObliterationBonus.Bonus_4_of_4 
+        //    && WorldBossSimulation.GetPartyCount(opponents) == opponents.Length) reductionModifier += 0.15f;
 
-        //night check
-        if(target.nightWalkerBonus == Character.NightWalkerBonus.Bonus_4_of_4 
-            && target.shield > 0) reductionModifier += 0.15f;
+        ////night check
+        //if(target.nightWalkerBonus == Character.NightWalkerBonus.Bonus_4_of_4 
+        //    && target.shield > 0) reductionModifier += 0.15f;
 
-        if (target.barrelBonus) reductionModifier += 0.05f;
-        if (author.barrelBonus) attackModifier -= 0.05f;
+        //if (target.barrelBonus) reductionModifier += 0.05f;
+        //if (author.barrelBonus) attackModifier -= 0.05f;
 
-        if (target.bushidoBonus) attackModifier += 0.1f;
-        if (author.bushidoBonus) attackModifier += 0.1f;
+        //if (target.bushidoBonus) attackModifier += 0.1f;
+        //if (author.bushidoBonus) attackModifier += 0.1f;
 
-        if (author.nightVisageBonus && author.hp == author.maxHp) attackModifier += 0.05f;
+        //if (author.nightVisageBonus && author.hp == author.maxHp) attackModifier += 0.05f;
 
-        if (WorldBossSimulation.GetPartyCount(opponents) == 1 
-            && author.conductionBonus == Character.ConductionBonus.Bonus_4_of_4) attackModifier += 0.25f;
+        //if (WorldBossSimulation.GetPartyCount(opponents) == 1 
+        //    && author.conductionBonus == Character.ConductionBonus.Bonus_4_of_4) attackModifier += 0.25f;
 
-        if (author.divinityBonus == Character.DivinityBonus.Bonus_3_of_3
-            && target.hp <= 0.3f * (float)target.maxHp) attackModifier += 0.30f;
+        //if (author.divinityBonus == Character.DivinityBonus.Bonus_3_of_3
+        //    && target.hp <= 0.3f * (float)target.maxHp) attackModifier += 0.30f;
 
         attackValue = Convert.ToInt32(attackValue * attackModifier);
 
@@ -109,6 +121,17 @@ class Logic
         {
             author.hp -= Convert.ToInt32(attackValue * 0.10);
         }
+        //enrage and team enrage
+        target.enrageBar += attackValue * target.enrage / 100f;
+        if (target.enrageBar > target.maxEnrage) target.enrageBar = target.maxEnrage;
+        foreach (Character member in opponents)
+        {
+            if (member.alive && member.teamEnrage > 0)
+            {
+                member.enrageBar += attackValue * target.teamEnrage / 100f;
+                if (target.enrageBar > target.maxEnrage) target.enrageBar = target.maxEnrage;
+            }
+        }
         if (target.shield > 0)
         {
             if (attackValue > target.shield)
@@ -123,9 +146,10 @@ class Logic
             }
         }
         target.hp -= attackValue;
-        if (target.hp < target.maxHp / 2 
-            && (int)target.nightWalkerBonus >= (int)Character.NightWalkerBonus.Bonus_3_of_4 
-            && !target.nightWalkerUsed)
+        // when init if user doesn't have NW, set bool to true
+        if (target.hp < target.maxHp / 2
+            && !target.nightWalkerUsed
+            && target.FindSetBonus(SetBonus.NWBonus, 3))
         {
             target.nightWalkerUsed = true;
             target.shield = target.maxShield;
@@ -134,32 +158,35 @@ class Logic
         {
             target.hp = -1;
             target.hp += ConsumptionProc(opponents);
+            if (!target.alive)
+            {
+                if (target.luminaryLife)
+                {
+                    target.hp += attackValuePrint;
+                    target.luminaryLife = false;
+                }
+            }
         }
-        if (!target.alive && target.illustriousBonus == Character.IllustriousBonus.Bonus_3_of_3)
+        if (!target.alive
+            && target.FindSetBonus(SetBonus.IllustriousBonus, 3)
+            && target.illustriousRevive)
         {
             target.hp = target.power;
             if (target.hp > target.maxHp) target.hp = target.maxHp;
-            target.illustriousBonus = Character.IllustriousBonus.None;
+            target.illustriousRevive = false;
         }
     }
     public static int ConsumptionProc(Character[] party)
     {
-
-        if (party.Count(member => member.consumptionBonus) > 0)
+        foreach (Character member in party)
         {
-            foreach (var member in party)
+            if (member.alive && member.FindMythBonus(MythicBonus.Consumption))
             {
-                if (member.consumptionBonus && RNGroll(5f))
-                {
-                    return member.power;
-                }
+                if (RNGroll(5f)) return member.power;
             }
-            return 0;
         }
-        else
-        {
-            return 0;
-        }
+        return 0;
+
     }
     public static int CountAlive(Character[] party)
     {
@@ -172,11 +199,11 @@ class Logic
     public static int DefensiveProcCase(Character hero)
     {
         int scenario = 10;
+        float evadeMod = 0f;
         if (RNGroll(hero.blockChance)) { scenario = 1; }
-        if (hero.hoodBonus)
-        {
-            if (RNGroll(hero.evadeChance + 5f)) { scenario = 0; }
-        }
+        if (hero.FindMythBonus(MythicBonus.HoodOfMenace) && hero.hp > 0.75f * hero.maxHp) evadeMod += 5f;
+
+        if (RNGroll(hero.evadeChance + evadeMod)) { scenario = 0; }
         return scenario;
     }
     public static Character RedirectSelection(Character target, Character[] party)
@@ -230,21 +257,7 @@ class Logic
         }
         return returnChar;
     }
-    public static void HpPerc(Character[] party)
-    {
-        int i;
-        for (i = 0; i < party.Length; i++)
-        {
-            if (party[i].alive)
-            {
-                //party[i].hpPerc = (float)(party[i].hp) / (float)(party[i].maxHp);
-            }
-            else
-            {
-                //party[i].hpPerc = 100;
-            }
-        }
-    }
+
     public static Character HealFindWeakestPerc(Character[] heroes)
     {
         int i;
@@ -271,12 +284,40 @@ class Logic
 
         //return heroes.Where(hero => hero.alive).OrderBy(hero => hero.hpPerc).First();
     }
+
+    public static Character ShieldFindWeakestPerc(Character[] heroes)
+    {
+        int i;
+        int lowest = 0;
+        //HpPerc(heroes);
+        for (i = 0; i < heroes.Length - 1; i++)
+        {
+            if (heroes[lowest].shieldPerc >= heroes[i + 1].shieldPerc)
+            {
+                if (heroes[i + 1].alive)
+                {
+                    lowest = i + 1;
+                }
+                else
+                {
+                    if (!heroes[lowest].alive)
+                    {
+                        lowest = i + 1;
+                    }
+                }
+            }
+        }
+        return heroes[lowest];
+
+        //return heroes.Where(hero => hero.alive).OrderBy(hero => hero.hpPerc).First();
+    }
+
     public static Character SelectTarget(Character[] party)
     {
         while (true)
         {
-            int target = random.Next(party.Length);
-            if (party[target].hp > 0) return party[target];
+            int target = ThreadSafeRandom.Next(party.Length);
+            if (party[target].alive) return party[target];
         }
     }
     public static Character SelectBack(Character[] party)
@@ -330,14 +371,14 @@ class Logic
     }
     public static Character SelectRicochet(Character[] party, Character currentTarget)
     {
-        Character newTarget = party[random.Next(party.Length)];
+        Character newTarget = party[ThreadSafeRandom.Next(party.Length)];
         while (true)
         {
             if (newTarget != currentTarget || newTarget.alive)
             {
                 break;
             }
-            newTarget = party[random.Next(party.Length)];
+            newTarget = party[ThreadSafeRandom.Next(party.Length)];
         }
         return newTarget;
     }

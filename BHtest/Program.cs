@@ -1,78 +1,73 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 
 namespace BHtest
 {
     class Program
     {
+        private static float winRate = 0;
+        private static int sliderValue = 0;
 
-        static void Main(string[] args)
+        static void Main()
         {
-            Character[] array = new Character[4];
-
-            array[0] = new Character { hp = 2, maxHp = 100 };
-            array[1] = new Character { hp = 1, maxHp = 10 };
-            array[2] = new Character { hp = 50, maxHp = 100 };
-            array[3] = new Character { hp = 600, maxHp = 1000 };
-
-            int[] returnarray = getSpreadValues(array, array[0], 0);
-            
-            SpecialDungeon SD = new SpecialDungeon(750);
-            SD.heroes = new Character[3];
+            SimgleThreadSim();
+            Console.WriteLine(" ");
+            OtherThreadSim();
+            Console.WriteLine(" ");
+            MultiThreadSim();
             for (int i = 0; i < 100; i++)
-            {
-                SD.heroes[0] = new Character
-                {
-                    // Base Stats
-                    //power = 3087,
-                    //stamina = 900,
-                    //agility = 250,
-                    power = 2670,
-                    stamina = 1345,
-                    agility = 232,
-                    // Specials
-                    critChance = 10,
-                    critDamage = 50f,
-                    dsChance = 0,
-                    empowerChance = 0,
-                    blockChance = 0f,
-                    evadeChance = 5f,
-                    deflectChance = 1.5f,
-                    absorbChance = 8.25f,
-                    // Runes
-                    powerRunes = 0f,
-                    staminaRunes = 0f,
-                    agilityRunes = 4f,
-                    damageReduction = 33.5f,
-                    // Pet
-                    petName = PetType.Urgoff,
-                    petProcType = PetProcType.GetHit,
-                    PetLevel = 3,
-                    weapon = Character.Weapon.ShieldStaff,
-                    metaRune = Character.MetaRune.Redirect,
-                    //hoodBonus = true,
-                    obliterationBonus = Character.ObliterationBonus.Bonus_4_of_4,
-                    _isHero = true
-                };
-                
-
-                
-
-                
-                //wb.difficultyModifier = 120;
-                SD.Simulation(0);
-            }
-            
-            //foreach (int ints in returnarray)
-            //{
-                //Console.WriteLine(ints.ToString() + "\r");
-                //}
-            TankSim();
-            Console.ReadLine();
+                //SimgleThreadSim();
+                //TankSim();
+                Console.ReadLine();
         }
 
+        static void MultiThreadSim()
+        {
+            HeroPanel[] heroes = new HeroPanel[1];
+            heroes[0] = new HeroPanel("600,540,480,15,100,10,0,0,2.5,0,0,0,10.5,0,10,spRegen,Spear,Boiguh,0,GetHit,None,2,None,2,None,2,None,None,None,None,None,None,False,END");
+            int bossType = 0;
+            int simDiff = 70;
+            int simsToRun = 1000;
+            MultiThreadSimHandler simHandler = new MultiThreadSimHandler(GameMode.Raid, heroes, bossType, simDiff, 1, simsToRun, CallbackWinrate, CallbackSliderValue, ShowError, button);
+            simHandler.LaunchSimulation();
+        }
+        static void OtherThreadSim()
+        {
+            HeroPanel[] heroes = new HeroPanel[1];
+            heroes[0] = new HeroPanel("600,540,480,15,100,10,0,0,2.5,0,0,0,10.5,0,10,spRegen,Spear,Boiguh,0,GetHit,None,2,None,2,None,2,None,None,None,None,None,None,False,END");
+            int bossType = 0;
+            int simDiff = 70;
+            int simsToRun = 1000;
+            MultiThreadSimHandler simHandler = new MultiThreadSimHandler(GameMode.Raid, heroes, bossType, simDiff, 1, simsToRun, CallbackWinrate, CallbackSliderValue, ShowError, button);
+            simHandler.LaunchSingleThreadSim();
+        }
 
+        static void SimgleThreadSim()
+        {
+            HeroPanel[] heroes = new HeroPanel[1];
+            heroes[0] = new HeroPanel("600,540,480,15,100,10,0,0,2.5,0,0,0,10.5,0,10,spRegen,Spear,Boiguh,0,GetHit,None,2,None,2,None,2,None,None,None,None,None,None,False,END");
+            RaidSimulation sim = new RaidSimulation(70, 1, heroes, 1);
+            sim.Simulation(0);
+        }
 
+        private static void CallbackWinrate(float winrate)
+        {
+            winRate = winrate;
+        }
+
+        private static void CallbackSliderValue(int _sliderValue)
+        {
+            sliderValue = _sliderValue;
+        }
+
+        private static void ShowError()
+        {
+            Console.WriteLine("Simulation has been forcibly stopped!");
+        }
+
+        private static bool button()
+        { return false; }
 
         private static int[] getSpreadValues(Character[] party, Character author, int value)
         {
@@ -243,23 +238,23 @@ namespace BHtest
             int countHits = 0;
 
             Character hero = new Character();
-            hero.power = 3087;
-            hero.stamina = 900;
-            hero.agility = 250;
+            hero.power = 2100;
+            hero.stamina = 800;
+            hero.agility = 100;
             hero.sp = 0;
             hero.shield = 0;
             hero.critChance = 10f;
             hero.critDamage = 50f;
             hero.dsChance = 0f;
-            hero.blockChance = 100f;
-            hero.evadeChance = 3.5f;
-            hero.deflectChance = 6f;
-            hero.absorbChance = 12.5f;
-            hero.damageReduction = 0f;
+            hero.blockChance = 0f;
+            hero.evadeChance = 13.5f;
+            hero.deflectChance = 0f;
+            hero.absorbChance = 7f;
+            hero.damageReduction = 64;
             hero.powerRunes = 0f;
             hero.agilityRunes = 0f;
             hero.petName = PetType.Urgoff;
-            hero.PetLevel = 4;
+            hero.PetLevel = 3;
             hero.petProcType = PetProcType.GetHit;
 
             hero.InitialiseHero();
@@ -386,263 +381,6 @@ namespace BHtest
             Console.WriteLine("Total evades: {0}. Actual percentage: {1}%", countEvades, evadePercentage);
             Console.WriteLine("Total blocks: {0}. Actual percentage: {1}%", countBlocks, blockPercentage);
             Console.WriteLine("Total hits: {0}. Actual percentage: {1}%", countHits, hitPercentage);
-        }
-
-        /*
-        static void TankSim()
-        {
-            int baseDamage = 5;
-            int damageMultiplier = 0;
-            int levelDamage;
-            int i;
-            int j;
-            bool blockRoll, evadeRoll, deflectRoll, absorbRoll;
-            int runs = 100;
-            int multiplierSum = 0;
-
-            Character hero = new Character();
-            hero.power = 1211;
-            hero.stamina = 1570;
-            hero.agility = 323;
-            hero.sp = 0;
-            hero.shield = 0;
-            hero.critChance = 10f;
-            hero.critDamage = 50f;
-            hero.dsChance = 0f;
-            hero.blockChance = 25f;
-            hero.evadeChance = 20f;
-            hero.deflectChance = 15f;
-            hero.absorbChance = 0f;
-            hero.damageReduction = 5f;
-            hero.powerRunes = 0f;
-            hero.agilityRunes = 0f;
-            //hero.petName = PetType.Urgoff;
-            hero.PetLevel = 3;
-            hero.petProcType = PetProcType.GetHit;
-
-            hero.InitialiseHero();
-
-            for (j = 0; j < runs; j++)
-            {
-                hero.Revive();
-                damageMultiplier = 0;
-                while (hero.alive)
-                {
-                    damageMultiplier++;
-                    levelDamage = baseDamage * damageMultiplier;
-
-                    hero.hp = hero.maxHp;
-                    hero.shield = 0;
-
-                    for (i = 0; i < 100; i++)
-                    {
-                        int currentDamage = levelDamage;
-                        blockRoll = Logic.RNGroll(hero.blockChance);
-                        evadeRoll = Logic.RNGroll(hero.evadeChance);
-                        deflectRoll = Logic.RNGroll(hero.deflectChance);
-                        absorbRoll = Logic.RNGroll(hero.absorbChance);
-                        if (!absorbRoll)
-                        {
-                            if (!deflectRoll)
-                            {
-                                if (!evadeRoll)
-                                {
-                                    if (!blockRoll)
-                                    {
-                                        if (hero.shield > 0)
-                                        {
-                                            if (currentDamage * hero.damageReduction > hero.shield)
-                                            {
-                                                currentDamage -= Convert.ToInt32(hero.shield / hero.damageReduction);
-                                                hero.shield = 0;
-                                            }
-                                            else
-                                            {
-                                                hero.shield -= Convert.ToInt32(currentDamage * hero.damageReduction);
-                                                currentDamage = 0;
-                                            }
-                                        }
-                                        hero.hp -= Convert.ToInt32(currentDamage * hero.damageReduction);
-                                        if (!hero.alive)
-                                        {
-                                            multiplierSum += damageMultiplier;
-                                            break;
-                                        }
-                                        else
-                                        {
-                                            hero.pet.PetSelection(hero, new Character[] { hero }, new Character[] { }, PetProcType.GetHit);
-                                        }
-                                    }
-                                    else
-                                    {
-
-                                        if (hero.shield > 0)
-                                        {
-                                            if (currentDamage * hero.damageReduction > hero.shield)
-                                            {
-                                                currentDamage -= Convert.ToInt32(hero.shield / hero.damageReduction);
-                                                hero.shield = 0;
-                                            }
-                                            else
-                                            {
-                                                hero.shield -= Convert.ToInt32(currentDamage * hero.damageReduction);
-                                                currentDamage = 0;
-                                            }
-                                        }
-
-                                        currentDamage = Convert.ToInt32(currentDamage * hero.damageReduction / 2);
-                                        hero.hp -= currentDamage;
-                                        if (hero.hp <= 0)
-                                        {
-                                            multiplierSum += damageMultiplier;
-                                            break;
-                                        }
-                                        else
-                                        {
-                                            hero.pet.PetSelection(hero, new Character[] { hero }, new Character[] { }, PetProcType.GetHit);
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    hero.pet.PetSelection(hero, new Character[] { hero }, new Character[] { }, PetProcType.GetHit);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            hero.shield += currentDamage;
-                            if (hero.shield > hero.maxShield) hero.shield = hero.maxShield;
-                            hero.pet.PetSelection(hero, new Character[] { hero }, new Character[] { }, PetProcType.GetHit);
-                        }
-                    }
-                }
-            }
-            int floor;
-            floor = Convert.ToInt32(multiplierSum / j);
-            float mitigation = (1 - (hero.maxHp / ((floor) * baseDamage * 100f))) * 100f;
-            Console.WriteLine("On average, hero died at level {0}.", floor);
-            Console.WriteLine("Total mitigation is {0}%.", mitigation);
-        }
-
-        */
-
-        static void PetProc(Character hero)
-        {
-            //switch (hero.currentPet)
-            //{
-            //    case Character.Pet.Boiguh:
-            //        BoiguhProc(hero);
-            //        break;
-            //    case Character.Pet.Gemmi:
-            //        GemmiProc(hero);
-            //        break;
-            //    case Character.Pet.Boogie:
-            //        BoogieProc(hero);
-            //        break;
-            //    default:
-            //        break;
-            //}
-        }
-
-        //static bool LuvboiProc(Character hero)
-        //{
-        //    hero.hp = 0;
-        //    if (hero.currentPet != Character.Pet.Luvboi)
-        //    {
-        //        return false;
-        //    }
-        //    else
-        //    {
-        //        bool petRoll = Logic.RNGroll(40f);
-        //        if (petRoll)
-        //        {
-        //            hero.hp = hero.power * 2;
-        //        }
-        //        return petRoll;
-        //    }
-        //}
-
-        static void BoiguhProc(Character hero)
-        {
-            Random rnd = new Random(Guid.NewGuid().GetHashCode());
-
-            int shieldModifier = Convert.ToInt32(hero.power * 0.06);
-            float shieldValue = Convert.ToInt32(rnd.Next(0, shieldModifier) + 0.27 * hero.power);
-
-            bool petRoll = Logic.RNGroll(20f);
-            bool critRoll = Logic.RNGroll(10f);
-            if (critRoll)
-            {
-                shieldValue *= 1.5f;
-            }
-            if (petRoll)
-            {
-                if (hero.hp > 0)
-                {
-                    hero.shield += Convert.ToInt32(shieldValue);
-                    if (hero.shield >= hero.maxShield)
-                    {
-                        hero.shield = hero.maxShield;
-                    }
-                }
-            }
-        }
-
-        static void GemmiProc(Character hero)
-        {
-            Random rnd = new Random(Guid.NewGuid().GetHashCode());
-            int i;
-            int healModifier = Convert.ToInt32(hero.power * 0.072);
-            float healValue = Convert.ToInt32(rnd.Next(0, healModifier) + 0.324 * hero.power);
-
-            bool petRoll = Logic.RNGroll(22f);
-
-            bool critoll = Logic.RNGroll(10f);
-            if (critoll)
-            {
-                healValue *= 1.5f;
-            }
-
-            if (petRoll)
-            {
-                for (i = 0; i < 5; i++)
-                {
-                    if (hero.hp > 0)
-                    {
-                        hero.hp += Convert.ToInt32(healValue);
-                        if (hero.hp >= hero.maxHp)
-                        {
-                            hero.hp = hero.maxHp;
-                        }
-                    }
-                }
-            }
-        }
-
-        static void BoogieProc(Character hero)
-        {
-            Random rnd = new Random(Guid.NewGuid().GetHashCode());
-
-            int healModifier = Convert.ToInt32(hero.power * 0.14);
-            int healValue = Convert.ToInt32(rnd.Next(0, healModifier) + 0.66 * hero.power);
-
-            bool petRoll = Logic.RNGroll(20f);
-            bool critoll = Logic.RNGroll(10f);
-            if (critoll)
-            {
-                healValue = Convert.ToInt32(healValue * 1.5f);
-            }
-
-            if (petRoll)
-            {
-                hero.hp += healValue;
-                if (hero.hp > hero.maxHp)
-                {
-                    hero.hp = hero.maxHp;
-                }
-
-            }
         }
     }
 }
